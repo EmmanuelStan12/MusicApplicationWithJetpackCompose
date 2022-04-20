@@ -12,6 +12,7 @@ const val MEDIA_ROOT_ID = "MEDIA_ROOT_ID"
 const val EMPTY_MEDIA_ROOT_ID = "EMPTY_MEDIA_ROOT_ID"
 
 const val QUIT_ACTION = "quit_action"
+const val MUSIC_IMAGE_URL = "https://images.unsplash.com/photo-1616356607338-fd87169ecf1a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
 
 inline val PlaybackStateCompat.isPrepared
     get() = state == PlaybackStateCompat.STATE_BUFFERING ||

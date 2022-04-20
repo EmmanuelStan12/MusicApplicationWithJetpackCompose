@@ -26,4 +26,9 @@ interface MusicDao {
 
     @Delete
     suspend fun deleteSong(song: MusicEntity)
+
+    suspend fun cacheSongs(songs: List<MusicEntity>) {
+        deleteAllSongs()
+        insertSongs(songs)
+    }
 }

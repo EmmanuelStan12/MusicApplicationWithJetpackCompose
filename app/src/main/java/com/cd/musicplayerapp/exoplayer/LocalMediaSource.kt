@@ -10,6 +10,7 @@ import androidx.core.net.toUri
 import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.cd.musicplayerapp.data.MusicDao
+import com.cd.musicplayerapp.data.MusicDatasource
 import com.cd.musicplayerapp.domain.toMusicEntity
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
@@ -22,7 +23,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 class LocalMediaSource @Inject constructor(
-    @ApplicationContext private val context: Context,
+    private val source: MusicDatasource,
     private val dao: MusicDao
 ): AbstractMusicSource() {
 
@@ -45,15 +46,15 @@ class LocalMediaSource @Inject constructor(
 
     private suspend fun updateCatalog(): List<MediaMetadataCompat> {
         return withContext(Dispatchers.IO) {
-            val songs = context.getLocalMusicList()
-            dao.insertSongs(songs.map { it.toMusicEntity() })
+            val songs = source.loadLocalMusic()
+            dao.cacheSongs(songs.map { it.toMusicEntity() })
             songs.map { music ->
                 val ( _mediaId, title, duration, artists, imageUri, musicUri ) = music
 
 
                 MediaMetadataCompat.Builder()
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artists.joinToString(" ,"))
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_SUBTITLE, artists.joinToString(" ,"))
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, artists.joinToString(" ,"))
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, _mediaId)
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)

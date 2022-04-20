@@ -47,9 +47,10 @@ fun MusicItem(
                 .width(50.dp)
                 .height(50.dp)
                 .clip(RoundedCornerShape(15.dp))
-                .background(Light)
+                .background(Light),
+            contentAlignment = Alignment.Center
         ) {
-            if(music.imageUri.isBlank()) {
+            if(music.imageUri.isNotBlank()) {
                 Icon(painter = painterResource(R.drawable.ic_noise), contentDescription = null, tint = colors.background, modifier = Modifier.size(30.dp))
             } else {
                 Image(
@@ -67,7 +68,7 @@ fun MusicItem(
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(text = music.title, style = MaterialTheme.typography.h4)
-                Spacer(Modifier.height(10.dp))
+                Spacer(Modifier.height(5.dp))
                 Text(
                     text = music.artists.joinToString(" ,"),
                     style = MaterialTheme.typography.body1

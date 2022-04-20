@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.core.app.NotificationCompat
@@ -87,6 +88,8 @@ class MusicNotificationManager(
         }
 
         override fun getCurrentContentText(player: Player): CharSequence? {
+            Timber.d("getting description content ${mediaController.metadata.getString(
+                MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)}")
             return mediaController.metadata.description.description
         }
 
@@ -95,7 +98,7 @@ class MusicNotificationManager(
             callback: PlayerNotificationManager.BitmapCallback
         ): Bitmap? {
             Glide.with(context).asBitmap()
-                .load(mediaController.metadata.description.iconUri)
+                .load(MUSIC_IMAGE_URL)
                 .into(object: CustomTarget<Bitmap>() {
                     override fun onResourceReady(
                         resource: Bitmap,
