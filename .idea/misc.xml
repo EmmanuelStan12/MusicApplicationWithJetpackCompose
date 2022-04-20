@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_fast_forward.xml" value="0.1" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_fast_rewind.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_music_note.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_pause.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_play.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_play_next.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_play_previous.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/drawable/ic_search.xml" value="0.117" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/font/baloo_bhaina_2_extrabold.xml" value="0.20786516853932585" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/font/baloo_bhaina_2_medium.xml" value="0.20786516853932585" />
+        <entry key="..\:/Users/emman/AndroidStudioProjects/MusicPlayerApp/app/src/main/res/font/baloo_paaji_2_semibold.xml" value="0.20786516853932585" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="Android Studio default JDK" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>
