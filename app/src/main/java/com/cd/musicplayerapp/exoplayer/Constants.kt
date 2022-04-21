@@ -3,6 +3,7 @@ package com.cd.musicplayerapp.exoplayer
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import com.cd.musicplayerapp.domain.Music
+import timber.log.Timber
 
 const val NOTIFICATION_CHANNEL_ID = "MUSIC_SERVICE_ID"
 const val NOTIFICATION_ID = 1
@@ -13,6 +14,8 @@ const val EMPTY_MEDIA_ROOT_ID = "EMPTY_MEDIA_ROOT_ID"
 
 const val QUIT_ACTION = "quit_action"
 const val MUSIC_IMAGE_URL = "https://images.unsplash.com/photo-1616356607338-fd87169ecf1a?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=870&q=80"
+
+const val METADATA_KEY_SIZE = "METADATA_KEY_SIZE"
 
 inline val PlaybackStateCompat.isPrepared
     get() = state == PlaybackStateCompat.STATE_BUFFERING ||
@@ -29,11 +32,18 @@ inline val PlaybackStateCompat.isPlayEnabled
             (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L &&
                     state == PlaybackStateCompat.STATE_PAUSED)
 
-fun MediaMetadataCompat.getMusic(): Music = Music(
-    _mediaId = description.mediaId ?: "",
-    title = description.title.toString(),
-    duration = getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
-    artists = description.subtitle.toString().split(","),
-    imageUri = description.iconUri.toString(),
-    musicUri = description.mediaUri.toString()
-)
+fun MediaMetadataCompat.getMusic(): Music = run {
+    Timber.d("getting description content ${getString(
+        MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)} album ${getString(
+        MediaMetadataCompat.METADATA_KEY_ALBUM)} size ${getString(METADATA_KEY_SIZE)}")
+    Music(
+        _mediaId = description.mediaId ?: "",
+        title = description.title.toString(),
+        duration = getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
+        artists = description.description.toString().split(","),
+        imageUri = description.iconUri.toString(),
+        musicUri = description.mediaUri.toString(),
+        album = getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
+        size = getString(METADATA_KEY_SIZE)
+    )
+}

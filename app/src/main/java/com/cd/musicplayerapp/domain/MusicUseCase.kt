@@ -18,7 +18,7 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
     val playbackState = musicConnection.playbackState
 
     val timePassed = flow {
-        while (true) {
+        while (playbackState.value?.isPlaying == true) {
             val duration = playbackState.value?.position ?: 0
             emit(duration)
             delay(1000L)

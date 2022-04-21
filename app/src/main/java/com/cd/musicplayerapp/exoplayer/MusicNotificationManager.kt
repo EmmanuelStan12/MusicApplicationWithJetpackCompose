@@ -34,37 +34,12 @@ class MusicNotificationManager(
         setChannelDescriptionResourceId(R.string.notification_channel_description)
         setMediaDescriptionAdapter(DescriptionAdapter(mediaController))
         setNotificationListener(notificationListener)
-        setCustomActionReceiver(object: PlayerNotificationManager.CustomActionReceiver{
-            override fun createCustomActions(
-                context: Context,
-                instanceId: Int
-            ): MutableMap<String, NotificationCompat.Action> {
-                val pendingIntent = Intent(context, Receiver::class.java).apply {
-                    action = QUIT_ACTION
-                }.let {
-                    PendingIntent.getBroadcast(context, 0, it, 0)
-                }
-                return mutableMapOf<String, NotificationCompat.Action>(
-                    "cancel" to NotificationCompat.Action(R.drawable.ic_cancel, "Cancel", pendingIntent)
-                )
-            }
-
-            override fun getCustomActions(player: Player): MutableList<String> {
-                return mutableListOf("cancel")
-            }
-
-            override fun onCustomAction(player: Player, action: String, intent: Intent) {
-                when(intent.action) {
-                    QUIT_ACTION -> {
-                        Timber.d("cancel clicked")
-                    }
-                }
-            }
-        })
     }.build()
         .apply {
             setSmallIcon(R.drawable.ic_music_note)
             setMediaSessionToken(sessionToken)
+            setColorized(true)
+            setColor(R.color.dark)
         }
 
     fun showNotification(player: Player) {

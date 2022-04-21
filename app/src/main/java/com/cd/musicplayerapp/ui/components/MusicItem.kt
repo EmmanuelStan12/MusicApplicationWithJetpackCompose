@@ -13,7 +13,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
@@ -26,6 +28,7 @@ fun MusicItem(
     modifier: Modifier = Modifier,
     music: Music,
     isPlaying: Boolean,
+    bottomPadding: Dp = 10.dp,
     onClick: (Music) -> Unit,
     onPlayClick: (Music, Boolean) -> Unit
 ) {
@@ -67,7 +70,10 @@ fun MusicItem(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
-                Text(text = music.title, style = MaterialTheme.typography.h4)
+                Text(
+                    text = music.title,
+                    style = MaterialTheme.typography.h4
+                )
                 Spacer(Modifier.height(5.dp))
                 Text(
                     text = music.artists.joinToString(" ,"),
@@ -94,5 +100,6 @@ fun MusicItem(
             }
         }
     }
+    Spacer(modifier = Modifier.height(bottomPadding))
 
 }

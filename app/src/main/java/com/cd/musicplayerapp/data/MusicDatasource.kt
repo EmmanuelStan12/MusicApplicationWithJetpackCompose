@@ -87,7 +87,10 @@ class MusicDatasource @Inject constructor(
                     duration,
                     artists,
                     imageUri,
-                    musicUri.toString()
+                    musicUri.toString(),
+                    0L,
+                    album,
+                    size
                 )
             )
         }
@@ -98,7 +101,7 @@ class MusicDatasource @Inject constructor(
     private fun getAlbumArt(album_id: Long) =
         ContentUris.withAppendedId(Uri.parse(sArtworkUri), album_id)
 
-    private fun filterFilePath(path: String = "/storage/emulated/0/Android/data/com.cd.musicplayerapp/files") {
+    private fun filterFilePath(path: String = "/storage/emulated/0/") {
         val dir = File(path)
         Timber.d("listing files in directory ${dir.listFiles()?.joinToString(" ,")}")
     }

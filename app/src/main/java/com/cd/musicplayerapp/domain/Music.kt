@@ -9,7 +9,9 @@ data class Music(
     val artists: List<String>,
     val imageUri: String,
     val musicUri: String,
-    val lastPlaybackPosition: Long = 0L
+    val lastPlaybackPosition: Long = 0L,
+    val album: String = "",
+    val size: String = ""
 )
 
 fun Music.toMusicEntity() = MusicEntity(
@@ -19,5 +21,16 @@ fun Music.toMusicEntity() = MusicEntity(
     artists,
     imageUri,
     musicUri,
-    lastPlaybackPosition
+    lastPlaybackPosition,
+    album,
+    size
+)
+
+val emptyMusic = Music(
+    "",
+    "",
+    0L,
+    emptyList<String>(),
+    "",
+    ""
 )

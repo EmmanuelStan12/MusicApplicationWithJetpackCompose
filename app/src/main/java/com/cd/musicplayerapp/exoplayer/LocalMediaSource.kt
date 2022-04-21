@@ -49,7 +49,7 @@ class LocalMediaSource @Inject constructor(
             val songs = source.loadLocalMusic()
             dao.cacheSongs(songs.map { it.toMusicEntity() })
             songs.map { music ->
-                val ( _mediaId, title, duration, artists, imageUri, musicUri ) = music
+                val ( _mediaId, title, duration, artists, imageUri, musicUri, length, album, size ) = music
 
 
                 MediaMetadataCompat.Builder()
@@ -61,6 +61,8 @@ class LocalMediaSource @Inject constructor(
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, imageUri)
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, musicUri)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
+                    .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                    .putString(METADATA_KEY_SIZE, size)
                     .build()
             }
         }

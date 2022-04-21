@@ -1,29 +1,24 @@
 package com.cd.musicplayerapp.ui.home
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.cd.musicplayerapp.domain.emptyMusic
 import com.cd.musicplayerapp.ui.components.MusicItem
 import com.cd.musicplayerapp.ui.components.Searchbar
 import com.cd.musicplayerapp.ui.details.CollapsedSheet
 import com.cd.musicplayerapp.ui.details.ExpandedSheet
-import com.cd.musicplayerapp.ui.theme.BBFontFamily
 import com.cd.musicplayerapp.ui.theme.Light
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -34,36 +29,64 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val state = viewModel.state.value
     val colors = MaterialTheme.colors
 
-    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState(
-        bottomSheetState = BottomSheetState(BottomSheetValue.Collapsed)
-    )
+    var offsetY by remember { mutableStateOf(70.dp.value) }
     val scope = rememberCoroutineScope()
+    val configuration = LocalConfiguration.current
+
+    val context = LocalContext.current
+
+    val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
 
     BottomSheetScaffold(
-        sheetPeekHeight = 70.dp,
-        sheetShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
         scaffoldState = bottomSheetScaffoldState,
+        backgroundColor = Color.Transparent,
+        sheetBackgroundColor = Color.Transparent,
         sheetContent = {
             AnimatedVisibility(
-                visible = bottomSheetScaffoldState.bottomSheetState.isCollapsed,
+                visible = bottomSheetScaffoldState.bottomSheetState.isCollapsed
             ) {
-                CollapsedSheet {
-                    Timber.d("Expand now")
+                CollapsedSheet(
+                    music = state.currentPlayingMusic ?: run {
+                        if (state.data.isNotEmpty()) state.data[0]
+                        else emptyMusic
+                    },
+                    isPlaying = state.musicState == MusicState.PLAYING,
+                    onPlayPauseClick = { _, music ->
+                        if (music._mediaId.isNotBlank()) viewModel.onPlayPauseButtonPressed(music)
+                        else Toast.makeText(context, "No available songs", Toast.LENGTH_SHORT)
+                            .show()
+                    }
+                ) {
                     scope.launch {
                         bottomSheetScaffoldState.bottomSheetState.expand()
                     }
                 }
             }
-            AnimatedVisibility(
-                visible = bottomSheetScaffoldState.bottomSheetState.isExpanded,
-            ) {
-                ExpandedSheet {
+            AnimatedVisibility(visible = bottomSheetScaffoldState.bottomSheetState.isExpanded) {
+                ExpandedSheet(
+                    music = state.currentPlayingMusic ?: run {
+                        Timber.d("state home ${state.data.joinToString(" ,")}")
+                        if (state.data.isNotEmpty()) state.data[0]
+                        else emptyMusic
+                    },
+                    timePassed = state.timePassed,
+                    onValueChanged = {
+                        viewModel.seekTo(it)
+                    },
+                    onPlayPauseClick = { _, music -> viewModel.onPlayPauseButtonPressed(music) },
+                    onPrevNextClick = {
+                        viewModel.onNextPrevClicked(it)
+                    },
+                    onFastForwardRewindClick = {  },
+                    isPlaying = state.musicState == MusicState.PLAYING
+                ) {
                     scope.launch {
                         bottomSheetScaffoldState.bottomSheetState.collapse()
                     }
                 }
             }
-        }
+        },
+        sheetPeekHeight = 70.dp,
     ) {
         Box(
             modifier = Modifier
@@ -78,26 +101,23 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             }
             Column(modifier = Modifier.fillMaxSize()) {
                 LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(10.dp),
                     contentPadding = PaddingValues(bottom = 10.dp)
                 ) {
                     item {
                         Text(
-                            text = "Hello",
-                            fontFamily = BBFontFamily,
-                            fontSize = 35.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = Light
+                            text = "Hello \uD83D\uDC4B",
+                            style = MaterialTheme.typography.h3
                         )
                         Text(
                             text = "What you want to hear today?",
                             style = MaterialTheme.typography.body1
                         )
+                        Spacer(Modifier.height(10.dp))
                         Searchbar(
                             value = "",
                             onValueChange = {}
                         )
-
+                        Spacer(Modifier.height(10.dp))
                     }
                     items(state.data.size) { index ->
                         val music = state.data[index]
@@ -105,8 +125,7 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                             music = music,
                             isPlaying = music._mediaId == state.currentPlayingMusic?._mediaId && state.musicState == MusicState.PLAYING,
                             onPlayClick = { it, isPlaying ->
-                                if (!isPlaying) viewModel.onMusicListItemPressed(it)
-                                else viewModel.onPlayPauseButtonPressed(it)
+                                viewModel.onPlayPauseButtonPressed(it)
                             },
                             onClick = {}
                         )

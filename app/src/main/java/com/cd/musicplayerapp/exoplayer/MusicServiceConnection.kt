@@ -120,7 +120,7 @@ class MusicServiceConnection @Inject constructor(
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
-            coroutineScope.launch { _currentSong.emit(metadata) }
+            coroutineScope.launch { _currentSong.value = metadata }
         }
     }
 }

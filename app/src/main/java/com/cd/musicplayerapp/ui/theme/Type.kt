@@ -11,24 +11,24 @@ import com.cd.musicplayerapp.R
 
 val BBFontFamily = FontFamily(
     Font(
-        R.font.baloo_bhaina_2,
+        R.font.sourcesanspro_regular,
         FontWeight.Normal,
         FontStyle.Normal
     ),
     Font(
-        R.font.baloo_bhaina_2,
-        FontWeight.Medium,
+        R.font.sourcesanspro_bold,
+        FontWeight.Bold,
         FontStyle.Normal
     ),
     Font(
-        R.font.baloo_bhaina_2,
+        R.font.sourcesanspro_semibold,
         FontWeight.SemiBold,
         FontStyle.Normal
     ),
     Font(
-        R.font.baloo_bhaina_2,
-        FontWeight.ExtraBold,
-        FontStyle.Normal
+        R.font.sourcesanspro_italic,
+        FontWeight.Normal,
+        FontStyle.Italic
     ),
 )
 
@@ -39,6 +39,12 @@ val Typography = Typography(
         fontSize = 16.sp,
         fontWeight = FontWeight.Normal,
         color = Light
+    ),
+    h3 = TextStyle(
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 48.sp,
+        color = Light,
+        fontFamily = BBFontFamily
     ),
     h6 = TextStyle(
         fontFamily = BBFontFamily,

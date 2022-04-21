@@ -10,7 +10,6 @@ import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.domain.MusicRepository
 import com.cd.musicplayerapp.domain.MusicUseCase
 import com.cd.musicplayerapp.domain.Resource
-import com.cd.musicplayerapp.exoplayer.getMusic
 import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -49,16 +48,24 @@ class HomeViewModel @Inject constructor(
         collectCurrentSong()
     }
 
+    private fun collectDuration() = viewModelScope.launch {
+        useCase.timePassed.collectLatest {
+            _state.value = state.value.copy(timePassed = it)
+        }
+    }
+
 
     private suspend fun collectSongs() {
         repository.getAllSongs().also {
+            Timber.d("HomeViewModel ${it.joinToString(" ,")}")
             _state.value = state.value.copy(data = it, loading = false)
         }
     }
 
     private fun collectCurrentSong() = viewModelScope.launch {
-        currentSong.collectLatest {
-            val music = it?.getMusic()
+        currentSong.collectLatest { metadata ->
+            val music = metadata?.description?.mediaId?.let { repository.getSongById(it) }
+
             _state.value = state.value.copy(currentPlayingMusic = music)
         }
     }
@@ -66,7 +73,10 @@ class HomeViewModel @Inject constructor(
     private fun collectPlayBackState() = viewModelScope.launch {
         playBackState.collectLatest { playback ->
             val musicState = playback?.getMusicState() ?: MusicState.NONE
-            _state.value = state.value.copy(musicState = musicState)
+            _state.value = state.value.copy(
+                musicState = musicState,
+                currentPlayingMusic = state.value.currentPlayingMusic?.copy(lastPlaybackPosition = playback?.position ?: 0L)
+            )
         }
     }
 
@@ -76,10 +86,9 @@ class HomeViewModel @Inject constructor(
 
     fun onPlayPauseButtonPressed(music: Music) = viewModelScope.launch {
         useCase.playPause(music._mediaId, true)
-    }
-
-    fun onMusicBottomBarPressed(music: Music) = viewModelScope.launch {
-
+        if(state.value.musicState == MusicState.PLAYING) {
+            collectDuration()
+        }
     }
 
     fun onSearchQueryChanged(query: String) = viewModelScope.launch {
@@ -87,8 +96,13 @@ class HomeViewModel @Inject constructor(
         searchQuery.emit(query)
     }
 
-    fun onBottomBarDismissed() = viewModelScope.launch {
-        useCase.stopPlaying()
+    fun seekTo(position: Float) = viewModelScope.launch {
+        useCase.seekTo(position.toLong())
+    }
+
+    fun onNextPrevClicked(isNext: Boolean) {
+        if(isNext) useCase.skipToNextTrack()
+        else useCase.skipToPrevTrack()
     }
 
     private fun subscribeToMusic() {

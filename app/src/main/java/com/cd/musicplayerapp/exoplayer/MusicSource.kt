@@ -128,7 +128,7 @@ abstract class AbstractMusicSource: MusicSource {
         val description = MediaDescriptionCompat.Builder()
             .setMediaUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
             .setTitle(song.description.title)
-            .setSubtitle(song.description.subtitle)
+            .setSubtitle(song.description.description)
             .setMediaId(song.description.mediaId)
             .setIconUri(song.description.iconUri)
             .build()
