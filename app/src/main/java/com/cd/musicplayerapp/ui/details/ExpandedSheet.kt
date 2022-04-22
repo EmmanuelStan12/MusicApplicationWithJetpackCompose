@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -14,19 +16,22 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
+import timber.log.Timber
 
 @Composable
 fun ExpandedSheet(
     music: Music,
     isPlaying: Boolean,
-    timePassed: Long,
     onValueChanged: (Float) -> Unit,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
+    onValueChangedFinished: () -> Unit,
+    currentPlayerPosition: Long,
     onFastForwardRewindClick: (Boolean) -> Unit,
-    collapse: () -> Unit
+    collapse: () -> Unit,
 ) {
 
     Column(
@@ -105,7 +110,8 @@ fun ExpandedSheet(
             onPlayPauseClick = onPlayPauseClick,
             onFastForwardRewindClick = onFastForwardRewindClick,
             onPrevNextClick = onPrevNextClick,
-            timePassed = timePassed
+            currentPlayerPosition = currentPlayerPosition,
+            onValueChangedFinished = onValueChangedFinished
         )
     }
 
@@ -114,20 +120,22 @@ fun ExpandedSheet(
 @Composable
 fun Seeker(
     music: Music,
-    timePassed: Long,
     onValueChanged: (Float) -> Unit,
     isPlaying: Boolean,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
-    onFastForwardRewindClick: (Boolean) -> Unit
+    onFastForwardRewindClick: (Boolean) -> Unit,
+    currentPlayerPosition: Long,
+    onValueChangedFinished: () -> Unit
 ) {
     Slider(
-        value = timePassed.toFloat(),
+        value = currentPlayerPosition.toFloat(),
         valueRange = 0F..music.duration.toFloat(),
         onValueChange = onValueChanged,
         colors = SliderDefaults.colors(
 
-        )
+        ),
+        onValueChangeFinished = onValueChangedFinished
     )
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -136,8 +144,8 @@ fun Seeker(
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
-        Text(text = "$timePassed", style = MaterialTheme.typography.body1)
-        Text(text = "${music.duration}", style = MaterialTheme.typography.body1)
+        Text(text = currentPlayerPosition.timeInMinutes, style = MaterialTheme.typography.body1)
+        Text(text = music.duration.timeInMinutes, style = MaterialTheme.typography.body1)
     }
     Spacer(modifier = Modifier.height(5.dp))
     Row(

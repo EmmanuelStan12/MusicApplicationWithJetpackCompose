@@ -38,8 +38,8 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
 
-    LaunchedEffect(key1 = state.musicState) {
-        viewModel.startCount()
+    LaunchedEffect(key1 = state.musicState, key2 = viewModel.shouldUpdateSeekbarPosition.value) {
+        viewModel.updateCurrentPlayerPosition()
     }
 
     BottomSheetScaffold(
@@ -74,15 +74,18 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                         if (state.data.isNotEmpty()) state.data[0]
                         else emptyMusic
                     },
-                    timePassed = state.timePassed,
+                    onValueChangedFinished = {
+                        viewModel.seekTo()
+                    },
+                    currentPlayerPosition = viewModel.currentPlayerPosition.value,
                     onValueChanged = {
-                        viewModel.seekTo(it)
+                        viewModel.onValueChanged(it)
                     },
                     onPlayPauseClick = { _, music -> viewModel.onPlayPauseButtonPressed(music) },
                     onPrevNextClick = {
                         viewModel.onNextPrevClicked(it)
                     },
-                    onFastForwardRewindClick = {  },
+                    onFastForwardRewindClick = { },
                     isPlaying = state.musicState == MusicState.PLAYING
                 ) {
                     scope.launch {

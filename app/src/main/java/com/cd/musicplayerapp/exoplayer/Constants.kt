@@ -1,9 +1,13 @@
 package com.cd.musicplayerapp.exoplayer
 
+import android.os.SystemClock
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING
 import com.cd.musicplayerapp.domain.Music
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 const val NOTIFICATION_CHANNEL_ID = "MUSIC_SERVICE_ID"
 const val NOTIFICATION_ID = 1
@@ -47,3 +51,15 @@ fun MediaMetadataCompat.getMusic(): Music = run {
         size = getString(METADATA_KEY_SIZE)
     )
 }
+
+inline val PlaybackStateCompat.currentPlaybackPosition: Long
+    get() = if(state == STATE_PLAYING) {
+        val timeDelta = SystemClock.elapsedRealtime() - lastPositionUpdateTime
+        (position + (timeDelta * playbackSpeed)).toLong()
+    } else position
+
+inline val Long.timeInMinutes: String
+    get() {
+        val dateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+        return dateFormat.format(this)
+    }

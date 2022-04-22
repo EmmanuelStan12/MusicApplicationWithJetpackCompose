@@ -10,6 +10,8 @@ import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.domain.MusicRepository
 import com.cd.musicplayerapp.domain.MusicUseCase
 import com.cd.musicplayerapp.domain.Resource
+import com.cd.musicplayerapp.exoplayer.MediaPlaybackService
+import com.cd.musicplayerapp.exoplayer.currentPlaybackPosition
 import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,18 +45,32 @@ class HomeViewModel @Inject constructor(
 
     private val playBackState = useCase.playbackState
 
+    private val _currentSongDuration = mutableStateOf(MediaPlaybackService.currentSongDuration)
+    val currentSongDuration: State<Long> = _currentSongDuration
+
+    private val _currentPlayerPosition = mutableStateOf(0L)
+    val currentPlayerPosition: State<Long> = _currentPlayerPosition
+
+    private val _currentSeekerPosition = mutableStateOf(0L)
+    val currentSeekerPosition: State<Long> = _currentPlayerPosition
+
+    val shouldUpdateSeekbarPosition = mutableStateOf(true)
+
     init {
         subscribeToMusic()
         collectPlayBackState()
         collectCurrentSong()
     }
 
-    fun startCount() = viewModelScope.launch {
-        while (state.value.musicState == MusicState.PLAYING && !state.value.isDone) {
-            delay(1000L)
-            _state.value = state.value.copy(timePassed = state.value.timePassed + 1000L)
+    fun updateCurrentPlayerPosition() = viewModelScope.launch {
+        while(state.value.musicState == MusicState.PLAYING && shouldUpdateSeekbarPosition.value) {
+            val position = playBackState.value?.currentPlaybackPosition
+            if(position != currentPlayerPosition.value) {
+                _currentPlayerPosition.value = position ?: 0L
+                _currentSongDuration.value = MediaPlaybackService.currentSongDuration
+            }
+            delay(100L)
         }
-
     }
 
 
@@ -95,8 +111,14 @@ class HomeViewModel @Inject constructor(
         searchQuery.emit(query)
     }
 
-    fun seekTo(position: Float) = viewModelScope.launch {
-        useCase.seekTo(position.toLong())
+    fun onValueChanged(value: Float) {
+        shouldUpdateSeekbarPosition.value = false
+        _currentSeekerPosition.value = value.toLong()
+    }
+
+    fun seekTo() = viewModelScope.launch {
+        shouldUpdateSeekbarPosition.value = true
+        useCase.seekTo(_currentSeekerPosition.value)
     }
 
     fun onNextPrevClicked(isNext: Boolean) {

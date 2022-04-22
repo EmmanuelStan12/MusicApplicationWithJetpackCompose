@@ -36,7 +36,7 @@ val BBFontFamily = FontFamily(
 val Typography = Typography(
     body1 = TextStyle(
         fontFamily = BBFontFamily,
-        fontSize = 16.sp,
+        fontSize = 18.sp,
         fontWeight = FontWeight.Normal,
         color = Light
     ),
@@ -68,6 +68,12 @@ val Typography = Typography(
         fontFamily = BBFontFamily,
         fontSize = 35.sp,
         fontWeight = FontWeight.ExtraBold,
+        color = Light
+    ),
+    button = TextStyle(
+        fontFamily = BBFontFamily,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.SemiBold,
         color = Light
     ),
 )

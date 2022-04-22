@@ -1,11 +1,11 @@
 package com.cd.musicplayerapp.data
 
-import android.R.attr.path
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
 import android.net.Uri
 import android.os.Build
+import android.os.Environment
 import android.provider.MediaStore
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.sArtworkUri
@@ -14,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
-import java.io.FileFilter
 import javax.inject.Inject
 
 
@@ -25,6 +24,7 @@ class MusicDatasource @Inject constructor(
     init {
         Timber.d("root dir ${context.filesDir} absolute dir ${context.filesDir.absolutePath}")
         Timber.d("external dirs ${context.getExternalFilesDir("/")}")
+        Timber.d("external dirs ${context.externalMediaDirs}")
         filterFilePath()
     }
 
@@ -102,8 +102,10 @@ class MusicDatasource @Inject constructor(
         ContentUris.withAppendedId(Uri.parse(sArtworkUri), album_id)
 
     private fun filterFilePath(path: String = "/storage/emulated/0/") {
-        val dir = File(path)
-        Timber.d("listing files in directory ${dir.listFiles()?.joinToString(" ,")}")
+        val musicDirectory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MUSIC)
+        val all = Environment.getExternalStorageDirectory()
+        Timber.d("Files", "Path: $musicDirectory, $all")
+
     }
 
 }
