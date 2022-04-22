@@ -17,14 +17,6 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
     val currentSong = musicConnection.currentSong
     val playbackState = musicConnection.playbackState
 
-    val timePassed = flow {
-        while (playbackState.value?.isPlaying == true) {
-            val duration = playbackState.value?.position ?: 0
-            emit(duration)
-            delay(1000L)
-        }
-    }
-
     suspend fun subscribeToService(): Resource<List<MediaBrowserCompat.MediaItem>> =
         suspendCoroutine { continuation ->
             musicConnection.subscribe(

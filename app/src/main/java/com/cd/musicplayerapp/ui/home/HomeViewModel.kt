@@ -13,6 +13,7 @@ import com.cd.musicplayerapp.domain.Resource
 import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -48,16 +49,17 @@ class HomeViewModel @Inject constructor(
         collectCurrentSong()
     }
 
-    private fun collectDuration() = viewModelScope.launch {
-        useCase.timePassed.collectLatest {
-            _state.value = state.value.copy(timePassed = it)
+    fun startCount() = viewModelScope.launch {
+        while (state.value.musicState == MusicState.PLAYING && !state.value.isDone) {
+            delay(1000L)
+            _state.value = state.value.copy(timePassed = state.value.timePassed + 1000L)
         }
+
     }
 
 
     private suspend fun collectSongs() {
         repository.getAllSongs().also {
-            Timber.d("HomeViewModel ${it.joinToString(" ,")}")
             _state.value = state.value.copy(data = it, loading = false)
         }
     }
@@ -66,7 +68,7 @@ class HomeViewModel @Inject constructor(
         currentSong.collectLatest { metadata ->
             val music = metadata?.description?.mediaId?.let { repository.getSongById(it) }
 
-            _state.value = state.value.copy(currentPlayingMusic = music)
+            _state.value = state.value.copy(currentPlayingMusic = music, timePassed = 0L)
         }
     }
 
@@ -86,9 +88,6 @@ class HomeViewModel @Inject constructor(
 
     fun onPlayPauseButtonPressed(music: Music) = viewModelScope.launch {
         useCase.playPause(music._mediaId, true)
-        if(state.value.musicState == MusicState.PLAYING) {
-            collectDuration()
-        }
     }
 
     fun onSearchQueryChanged(query: String) = viewModelScope.launch {

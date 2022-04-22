@@ -10,7 +10,13 @@ data class HomeScreenState(
     val error: String = "",
     val musicState: MusicState = MusicState.NONE,
     val timePassed: Long = 0L
-)
+) {
+    val isDone: Boolean get() {
+        return currentPlayingMusic?.let {
+            timePassed >= it.duration
+        } == true
+    }
+}
 
 enum class MusicState {
     PLAYING, PAUSED, NONE

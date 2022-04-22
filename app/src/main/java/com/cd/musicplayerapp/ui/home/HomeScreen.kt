@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,13 +31,16 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
     val state = viewModel.state.value
     val colors = MaterialTheme.colors
 
-    var offsetY by remember { mutableStateOf(70.dp.value) }
     val scope = rememberCoroutineScope()
     val configuration = LocalConfiguration.current
 
     val context = LocalContext.current
 
     val bottomSheetScaffoldState = rememberBottomSheetScaffoldState()
+
+    LaunchedEffect(key1 = state.musicState) {
+        viewModel.startCount()
+    }
 
     BottomSheetScaffold(
         scaffoldState = bottomSheetScaffoldState,

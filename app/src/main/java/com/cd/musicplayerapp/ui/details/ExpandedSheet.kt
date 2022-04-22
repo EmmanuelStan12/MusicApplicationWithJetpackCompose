@@ -136,7 +136,7 @@ fun Seeker(
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
-        Text(text = "${music.lastPlaybackPosition}", style = MaterialTheme.typography.body1)
+        Text(text = "$timePassed", style = MaterialTheme.typography.body1)
         Text(text = "${music.duration}", style = MaterialTheme.typography.body1)
     }
     Spacer(modifier = Modifier.height(5.dp))
