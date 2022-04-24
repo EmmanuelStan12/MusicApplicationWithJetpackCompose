@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
@@ -59,7 +58,9 @@ fun ExternalStoragePermission(
 
     if (readPermission.permissionRequested && !readPermission.hasPermission && !hasWritePermission) {
         Column(
-            modifier = Modifier.fillMaxSize().background(MaterialTheme.colors.background),
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.background),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -69,7 +70,7 @@ fun ExternalStoragePermission(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Light)
-                    .clickable {  }
+                    .clickable { }
                     .padding(horizontal = 15.dp, vertical = 10.dp)
             ) {
                 Text(text = "Request Permission", style = MaterialTheme.typography.button, color = Black)
@@ -88,36 +89,45 @@ fun Rationale(
     text: String,
     onRequestPermission: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = { /* Don't */ },
-        title = {
-            Text(text = "Permission request", style = MaterialTheme.typography.h6)
-        },
-        text = {
-            Text(text = text, style = MaterialTheme.typography.body1)
-        },
-        confirmButton = {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Light)
-                    .clickable { onRequestPermission() }
-                    .padding(horizontal = 15.dp, vertical = 10.dp)
-            ) {
-                Text(text = "Accept", style = MaterialTheme.typography.button, color = Black)
-            }
-        },
-        dismissButton = {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(Light)
-                    .clickable {  }
-                    .padding(horizontal = 15.dp, vertical = 10.dp)
-            ) {
-                Text(text = "Reject", style = MaterialTheme.typography.button, color = Black)
-            }
-        },
-        backgroundColor = MaterialTheme.colors.background
-    )
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.background),
+        contentAlignment = Alignment.Center
+    ) {
+        AlertDialog(
+            onDismissRequest = { /* Don't */ },
+            title = {
+                Text(text = "Permission request", style = MaterialTheme.typography.h6)
+            },
+            text = {
+                Text(text = text, style = MaterialTheme.typography.body1)
+            },
+            confirmButton = {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Light)
+                        .clickable { onRequestPermission() }
+                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                ) {
+                    Text(text = "Accept", style = MaterialTheme.typography.button, color = Black)
+                }
+            },
+            dismissButton = {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(Light)
+                        .clickable { }
+                        .padding(horizontal = 15.dp, vertical = 10.dp)
+                ) {
+                    Text(text = "Reject", style = MaterialTheme.typography.button, color = Black)
+                }
+            },
+            backgroundColor = MaterialTheme.colors.background,
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.padding(10.dp)
+        )
+    }
 }

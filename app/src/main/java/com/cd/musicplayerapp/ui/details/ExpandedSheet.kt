@@ -1,38 +1,43 @@
 package com.cd.musicplayerapp.ui.details
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
+import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
-import timber.log.Timber
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun ExpandedSheet(
     music: Music,
     isPlaying: Boolean,
-    onValueChanged: (Float) -> Unit,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
-    onValueChangedFinished: () -> Unit,
+    onValueChangedFinished: (Long) -> Unit,
     currentPlayerPosition: Long,
     onFastForwardRewindClick: (Boolean) -> Unit,
+    valueChanging: () -> Unit,
     collapse: () -> Unit,
 ) {
+
+    val painter = rememberImagePainter(music.imageUri)
 
     Column(
         modifier = Modifier
@@ -69,21 +74,43 @@ fun ExpandedSheet(
         Spacer(Modifier.height(10.dp))
         Text(text = music.album, style = MaterialTheme.typography.h4)
         Spacer(Modifier.height(10.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .fillMaxHeight(0.5f)
-                .clip(RoundedCornerShape(10.dp))
-                .background(Black),
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_headphones),
-                contentDescription = null,
-                tint = Light,
-                modifier = Modifier
-                    .fillMaxSize(0.8f)
-                    .align(Alignment.Center)
-            )
+        when (painter.state) {
+            is ImagePainter.State.Success -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(0.5f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Black),
+                ) {
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            else -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(0.5f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Black),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_headphones),
+                        contentDescription = null,
+                        tint = Light,
+                        modifier = Modifier
+                            .fillMaxSize(0.8f)
+                            .align(Alignment.Center)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(10.dp))
         Text(
@@ -96,7 +123,7 @@ fun ExpandedSheet(
         )
         Spacer(Modifier.height(10.dp))
         Text(
-            text = music.artists.joinToString(" ,"),
+            text = music.artists.joinToString(" "),
             style = MaterialTheme.typography.body1,
             modifier = Modifier.padding(horizontal = 15.dp),
             maxLines = 2,
@@ -105,13 +132,13 @@ fun ExpandedSheet(
         )
         Seeker(
             music = music,
-            onValueChanged = onValueChanged,
             isPlaying = isPlaying,
             onPlayPauseClick = onPlayPauseClick,
             onFastForwardRewindClick = onFastForwardRewindClick,
             onPrevNextClick = onPrevNextClick,
             currentPlayerPosition = currentPlayerPosition,
-            onValueChangedFinished = onValueChangedFinished
+            onValueChangedFinished = onValueChangedFinished,
+            valueChanging = valueChanging
         )
     }
 
@@ -120,22 +147,36 @@ fun ExpandedSheet(
 @Composable
 fun Seeker(
     music: Music,
-    onValueChanged: (Float) -> Unit,
     isPlaying: Boolean,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
     onFastForwardRewindClick: (Boolean) -> Unit,
     currentPlayerPosition: Long,
-    onValueChangedFinished: () -> Unit
+    onValueChangedFinished: (Long) -> Unit,
+    valueChanging: () -> Unit
 ) {
+
+    var seekbarValue by remember {
+        mutableStateOf(currentPlayerPosition)
+    }
+
+    LaunchedEffect(key1 = currentPlayerPosition) {
+        seekbarValue = currentPlayerPosition
+    }
+
     Slider(
-        value = currentPlayerPosition.toFloat(),
+        value = seekbarValue.toFloat(),
         valueRange = 0F..music.duration.toFloat(),
-        onValueChange = onValueChanged,
+        onValueChange = {
+            seekbarValue = it.toLong()
+            valueChanging()
+        },
         colors = SliderDefaults.colors(
 
         ),
-        onValueChangeFinished = onValueChangedFinished
+        onValueChangeFinished = {
+            onValueChangedFinished(seekbarValue)
+        }
     )
     Row(
         horizontalArrangement = Arrangement.SpaceBetween,

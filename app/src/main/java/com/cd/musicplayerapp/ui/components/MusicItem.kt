@@ -13,16 +13,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import coil.annotation.ExperimentalCoilApi
+import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
 fun MusicItem(
     modifier: Modifier = Modifier,
@@ -34,6 +37,7 @@ fun MusicItem(
 ) {
 
     val colors = MaterialTheme.colors
+    val painter = rememberImagePainter(music.imageUri)
 
     Row(
         modifier = modifier
@@ -53,21 +57,41 @@ fun MusicItem(
                 .background(Light),
             contentAlignment = Alignment.Center
         ) {
-            if(music.imageUri.isNotBlank()) {
-                Icon(painter = painterResource(R.drawable.ic_noise), contentDescription = null, tint = colors.background, modifier = Modifier.size(30.dp))
-            } else {
-                Image(
-                    painter = rememberImagePainter(
-                        data = music.imageUri
-                    ), contentDescription = null
-                )
+            when (painter.state) {
+                is ImagePainter.State.Loading -> {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_noise),
+                        contentDescription = null,
+                        tint = colors.background,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                is ImagePainter.State.Success -> {
+                    Image(painter = painter, contentDescription = null)
+                }
+                is ImagePainter.State.Error -> {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_noise),
+                        contentDescription = null,
+                        tint = colors.background,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+                ImagePainter.State.Empty -> {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_noise),
+                        contentDescription = null,
+                        tint = colors.background,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.width(10.dp))
         Column(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.Start
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
@@ -76,7 +100,7 @@ fun MusicItem(
                 )
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    text = music.artists.joinToString(" ,"),
+                    text = music.artists.joinToString(" "),
                     style = MaterialTheme.typography.body1
                 )
             }
@@ -86,17 +110,26 @@ fun MusicItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = music.duration.toString(), style = MaterialTheme.typography.body1)
+                Text(text = music.duration.timeInMinutes, style = MaterialTheme.typography.body1)
                 IconButton(onClick = {
                     onPlayClick(music, isPlaying)
                 }) {
                     Icon(
-                        painter = painterResource(id = if(isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
+                        painter = painterResource(id = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
                         contentDescription = null,
                         tint = Light,
                         modifier = Modifier.size(30.dp)
                     )
                 }
+            }
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(Light.copy(alpha = 0.1f))
+                    .clickable { }
+                    .padding(horizontal = 10.dp, vertical = 7.dp)
+            ) {
+                Text(text = music.album, style = MaterialTheme.typography.button, color = Light)
             }
         }
     }

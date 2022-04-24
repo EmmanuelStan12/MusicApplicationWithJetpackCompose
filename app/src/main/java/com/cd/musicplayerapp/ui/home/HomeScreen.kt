@@ -70,16 +70,15 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
             AnimatedVisibility(visible = bottomSheetScaffoldState.bottomSheetState.isExpanded) {
                 ExpandedSheet(
                     music = state.currentPlayingMusic ?: run {
-                        Timber.d("state home ${state.data.joinToString(" ,")}")
                         if (state.data.isNotEmpty()) state.data[0]
                         else emptyMusic
                     },
                     onValueChangedFinished = {
-                        viewModel.seekTo()
+                        viewModel.seekTo(it)
                     },
                     currentPlayerPosition = viewModel.currentPlayerPosition.value,
-                    onValueChanged = {
-                        viewModel.onValueChanged(it)
+                    valueChanging = {
+                        viewModel.onValueChanged()
                     },
                     onPlayPauseClick = { _, music -> viewModel.onPlayPauseButtonPressed(music) },
                     onPrevNextClick = {
@@ -135,7 +134,12 @@ fun HomeScreen(viewModel: HomeViewModel = hiltViewModel()) {
                             onPlayClick = { it, isPlaying ->
                                 viewModel.onPlayPauseButtonPressed(it)
                             },
-                            onClick = {}
+                            onClick = {
+                                scope.launch {
+                                    bottomSheetScaffoldState.bottomSheetState.expand()
+                                    viewModel.onPlayPauseButtonPressed(it)
+                                }
+                            }
                         )
                     }
                 }

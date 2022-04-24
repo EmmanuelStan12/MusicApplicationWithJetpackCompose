@@ -10,7 +10,6 @@ import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.domain.MusicRepository
 import com.cd.musicplayerapp.domain.MusicUseCase
 import com.cd.musicplayerapp.domain.Resource
-import com.cd.musicplayerapp.exoplayer.MediaPlaybackService
 import com.cd.musicplayerapp.exoplayer.currentPlaybackPosition
 import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -45,14 +44,8 @@ class HomeViewModel @Inject constructor(
 
     private val playBackState = useCase.playbackState
 
-    private val _currentSongDuration = mutableStateOf(MediaPlaybackService.currentSongDuration)
-    val currentSongDuration: State<Long> = _currentSongDuration
-
     private val _currentPlayerPosition = mutableStateOf(0L)
     val currentPlayerPosition: State<Long> = _currentPlayerPosition
-
-    private val _currentSeekerPosition = mutableStateOf(0L)
-    val currentSeekerPosition: State<Long> = _currentPlayerPosition
 
     val shouldUpdateSeekbarPosition = mutableStateOf(true)
 
@@ -63,11 +56,10 @@ class HomeViewModel @Inject constructor(
     }
 
     fun updateCurrentPlayerPosition() = viewModelScope.launch {
-        while(state.value.musicState == MusicState.PLAYING && shouldUpdateSeekbarPosition.value) {
+        while (state.value.musicState == MusicState.PLAYING && shouldUpdateSeekbarPosition.value) {
             val position = playBackState.value?.currentPlaybackPosition
             if(position != currentPlayerPosition.value) {
                 _currentPlayerPosition.value = position ?: 0L
-                _currentSongDuration.value = MediaPlaybackService.currentSongDuration
             }
             delay(100L)
         }
@@ -111,24 +103,24 @@ class HomeViewModel @Inject constructor(
         searchQuery.emit(query)
     }
 
-    fun onValueChanged(value: Float) {
+    fun onValueChanged() {
         shouldUpdateSeekbarPosition.value = false
-        _currentSeekerPosition.value = value.toLong()
     }
 
-    fun seekTo() = viewModelScope.launch {
+    fun seekTo(value: Long) = viewModelScope.launch {
+        useCase.seekTo(value)
+        _currentPlayerPosition.value = value
+        delay(100L)
         shouldUpdateSeekbarPosition.value = true
-        useCase.seekTo(_currentSeekerPosition.value)
     }
 
     fun onNextPrevClicked(isNext: Boolean) {
-        if(isNext) useCase.skipToNextTrack()
+        if (isNext) useCase.skipToNextTrack()
         else useCase.skipToPrevTrack()
     }
 
     private fun subscribeToMusic() {
         viewModelScope.launch(Dispatchers.IO) {
-            Timber.d("current thread is ${Thread.currentThread().name}")
             withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(loading = true)
             }

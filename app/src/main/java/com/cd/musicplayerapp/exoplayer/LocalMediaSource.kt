@@ -53,8 +53,8 @@ class LocalMediaSource @Inject constructor(
 
 
                 MediaMetadataCompat.Builder()
-                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artists.joinToString(" ,"))
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, artists.joinToString(" ,"))
+                    .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artists.joinToString(" "))
+                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, artists.joinToString(" "))
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, _mediaId)
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
