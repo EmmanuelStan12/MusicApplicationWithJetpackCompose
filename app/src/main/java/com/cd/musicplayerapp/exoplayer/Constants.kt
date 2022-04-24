@@ -10,7 +10,9 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 const val NOTIFICATION_CHANNEL_ID = "MUSIC_SERVICE_ID"
+const val NOTIFICATION_CHANNEL_NAME = "NOTIFICATION_CHANNEL_NAME"
 const val NOTIFICATION_ID = 1
+const val SERVICE_NOTIFICATION_ID = 2
 const val sArtworkUri = "content://media/external/audio/albumart"
 
 const val MEDIA_ROOT_ID = "MEDIA_ROOT_ID"

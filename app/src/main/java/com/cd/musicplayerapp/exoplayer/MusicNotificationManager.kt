@@ -40,6 +40,8 @@ class MusicNotificationManager(
             setMediaSessionToken(sessionToken)
             setColorized(true)
             setColor(R.color.dark)
+            setUseNextActionInCompactView(true)
+            setUsePreviousActionInCompactView(true)
         }
 
     fun showNotification(player: Player) {

@@ -7,7 +7,7 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name=".BaseApplication"
@@ -19,15 +19,15 @@
         android:theme="@style/Theme.MusicPlayerApp">
         <service android:name=".exoplayer.MediaPlaybackService"
             android:exported="false">
+        </service>
+        <service android:name=".receiver.AlarmService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <receiver android:name=".exoplayer.Receiver"
+        <receiver android:name=".receiver.AlarmReceiver"
             android:exported="true">
-            <intent-filter>
-                <action android:name="quit_action" />
-            </intent-filter>
         </receiver>
         <activity
             android:name=".MainActivity"

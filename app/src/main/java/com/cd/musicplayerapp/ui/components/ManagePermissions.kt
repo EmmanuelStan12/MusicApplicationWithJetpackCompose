@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -33,27 +34,37 @@ fun ExternalStoragePermission(
     val minSdk29 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
 
     var hasWritePermission by remember { mutableStateOf(minSdk29) }
+    var removeWriteAlertDialog by remember {
+        mutableStateOf(false)
+    }
+    var removeReadPermission by remember {
+        mutableStateOf(false)
+    }
 
     LaunchedEffect(key1 = writePermission.hasPermission) {
         hasWritePermission = writePermission.hasPermission || minSdk29
     }
 
-    if (!readPermission.hasPermission) {
+    if (!readPermission.hasPermission && !removeReadPermission) {
         Rationale(
             text = "Read Storage Request",
             onRequestPermission = {
                 readPermission.launchPermissionRequest()
             }
-        )
+        ) {
+            removeReadPermission = true
+        }
     }
 
-    if (!writePermission.hasPermission && !minSdk29) {
+    if (!writePermission.hasPermission && !minSdk29 && !removeWriteAlertDialog) {
         Rationale(
             text = "Write Storage Request",
             onRequestPermission = {
                 readPermission.launchPermissionRequest()
             }
-        )
+        ) {
+            removeWriteAlertDialog = true
+        }
     }
 
     if (readPermission.permissionRequested && !readPermission.hasPermission && !hasWritePermission) {
@@ -70,7 +81,10 @@ fun ExternalStoragePermission(
                 modifier = Modifier
                     .clip(RoundedCornerShape(8.dp))
                     .background(Light)
-                    .clickable { }
+                    .clickable {
+                        removeReadPermission = false
+                        removeWriteAlertDialog = false
+                    }
                     .padding(horizontal = 15.dp, vertical = 10.dp)
             ) {
                 Text(text = "Request Permission", style = MaterialTheme.typography.button, color = Black)
@@ -87,7 +101,8 @@ fun ExternalStoragePermission(
 @Composable
 fun Rationale(
     text: String,
-    onRequestPermission: () -> Unit
+    onRequestPermission: () -> Unit,
+    onDismiss: () -> Unit
 ) {
     Box(
         modifier = Modifier
@@ -96,7 +111,8 @@ fun Rationale(
         contentAlignment = Alignment.Center
     ) {
         AlertDialog(
-            onDismissRequest = { /* Don't */ },
+            onDismissRequest = onDismiss,
+            properties = DialogProperties(dismissOnClickOutside = false),
             title = {
                 Text(text = "Permission request", style = MaterialTheme.typography.h6)
             },
@@ -106,6 +122,7 @@ fun Rationale(
             confirmButton = {
                 Box(
                     modifier = Modifier
+                        .padding(10.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(Light)
                         .clickable { onRequestPermission() }
@@ -117,9 +134,10 @@ fun Rationale(
             dismissButton = {
                 Box(
                     modifier = Modifier
+                        .padding(10.dp)
                         .clip(RoundedCornerShape(8.dp))
                         .background(Light)
-                        .clickable { }
+                        .clickable { onDismiss() }
                         .padding(horizontal = 15.dp, vertical = 10.dp)
                 ) {
                     Text(text = "Reject", style = MaterialTheme.typography.button, color = Black)

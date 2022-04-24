@@ -3,7 +3,7 @@ package com.cd.musicplayerapp.ui
 sealed class Screen(
     val route: String
 ) {
-    object Home: Screen("home")
+    object Home: Screen("home_screen")
 
-    object HomePlayer: Screen("home_player")
+    object PlaylistScreen: Screen("playlist_screen")
 }

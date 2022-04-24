@@ -8,10 +8,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import timber.log.Timber
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-@ViewModelScoped
+@Singleton
 class MusicUseCase @Inject constructor(private val musicConnection: MusicServiceConnection) {
 
     val currentSong = musicConnection.currentSong

@@ -15,16 +15,14 @@ import kotlinx.coroutines.withContext
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import javax.inject.Singleton
 
-
+@Singleton
 class MusicDatasource @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
 
     init {
-        Timber.d("root dir ${context.filesDir} absolute dir ${context.filesDir.absolutePath}")
-        Timber.d("external dirs ${context.getExternalFilesDir("/")}")
-        Timber.d("external dirs ${context.externalMediaDirs}")
         filterFilePath()
     }
 
