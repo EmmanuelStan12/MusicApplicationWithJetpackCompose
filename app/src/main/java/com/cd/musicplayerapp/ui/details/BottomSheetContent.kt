@@ -25,7 +25,7 @@ fun ColumnScope.BottomSheetContent(
     onValueChanged: () -> Unit,
     currentPlayerPosition: Long,
     onNextPrevClicked: (Boolean) -> Unit,
-    onRepeatStateChanged: () -> Unit
+    onRepeatStateChanged: () -> Unit,
 ) {
 
     val context = LocalContext.current
@@ -69,7 +69,6 @@ fun ColumnScope.BottomSheetContent(
             repeatState = state.repeatState,
             onRepeatStateChanged = onRepeatStateChanged,
             isPlaying = state.musicState == MusicState.PLAYING,
-            data = state.musicList
         ) {
             scope.launch {
                 bottomSheetScaffoldState.bottomSheetState.collapse()

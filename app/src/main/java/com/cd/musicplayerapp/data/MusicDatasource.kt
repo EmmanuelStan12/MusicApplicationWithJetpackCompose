@@ -97,20 +97,6 @@ class MusicDatasource @Inject constructor(
         return musicList
     }
 
-    companion object {
-        fun loadMusicImageUri(uri: String): Bitmap? {
-            val mediaMetadataRetriever = MediaMetadataRetriever()
-            mediaMetadataRetriever.setDataSource(uri, HashMap())
-            return try {
-                val coverImage = mediaMetadataRetriever.embeddedPicture
-                BitmapFactory.decodeByteArray(coverImage, 0, coverImage!!.size)
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
-        }
-    }
-
     private fun getAlbumArt(album_id: Long) =
         ContentUris.withAppendedId(Uri.parse(sArtworkUri), album_id)
 

@@ -13,27 +13,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
-import com.cd.musicplayerapp.data.MusicDatasource
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.PagerState
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun ExpandedPager(
-    data: List<Music>,
+    music: Music,
     modifier: Modifier = Modifier,
-    pagerState: PagerState,
     collapse: () -> Unit
 ) {
 
@@ -64,9 +63,7 @@ fun ExpandedPager(
                 )
             }
         }
-        HorizontalPager(count = data.size, modifier = Modifier.fillMaxSize(), state = pagerState) { index ->
-            HorizontalPagerItem(music = data[index])
-        }
+        HorizontalPagerItem(music = music)
     }
 
 }
@@ -75,13 +72,12 @@ fun ExpandedPager(
 fun HorizontalPagerItem(
     music: Music
 ) {
-    val painter = rememberImagePainter(MusicDatasource.loadMusicImageUri(music.musicUri))
+    val context = LocalContext.current
+    val painter = rememberImagePainter(context.loadMusicImageUri(music.musicUri.toUri()))
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
-            .background(MaterialTheme.colors.background),
+            .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(10.dp))

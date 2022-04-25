@@ -67,6 +67,10 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun playFromMediaId(music: Music) {
+        useCase.playFromMediaId(music._mediaId)
+    }
+
     fun seekTo(value: Long) = viewModelScope.launch {
         useCase.seekTo(value)
         _currentPlayerPosition.value = value
@@ -87,9 +91,6 @@ class MainViewModel @Inject constructor(
             val musicState = playback?.getMusicState() ?: MusicState.NONE
             _state.value = state.value.copy(
                 musicState = musicState,
-                currentPlayingMusic = state.value.currentPlayingMusic?.copy(
-                    lastPlaybackPosition = playback?.position ?: 0L
-                )
             )
         }
     }

@@ -13,15 +13,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.data.MusicDatasource
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
@@ -38,7 +41,8 @@ fun MusicItem(
 ) {
 
     val colors = MaterialTheme.colors
-    val painter = rememberImagePainter(MusicDatasource.loadMusicImageUri(music.musicUri))
+    val context = LocalContext.current
+    val painter = rememberImagePainter(context.loadMusicImageUri(music.musicUri.toUri()))
 
     Row(
         modifier = modifier

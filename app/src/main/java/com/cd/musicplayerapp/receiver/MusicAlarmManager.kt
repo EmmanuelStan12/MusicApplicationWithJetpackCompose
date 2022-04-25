@@ -25,7 +25,7 @@ class MusicAlarmManager @Inject constructor(
 
         alarmManager?.setInexactRepeating(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
-            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_HALF_DAY,
+            SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
             AlarmManager.INTERVAL_HALF_DAY,
             alarmManagerPendingIntent
         )

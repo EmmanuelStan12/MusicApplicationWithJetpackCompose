@@ -1,10 +1,13 @@
 package com.cd.musicplayerapp.ui.details
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
@@ -18,12 +21,12 @@ import com.cd.musicplayerapp.ui.theme.Light
 import com.cd.musicplayerapp.ui.theme.LightBlue
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.rememberPagerState
+import timber.log.Timber
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalPagerApi::class)
 @Composable
 fun ExpandedSheet(
     currentPlayingMusic: Music,
-    data: List<Music>,
     isPlaying: Boolean,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
@@ -33,17 +36,20 @@ fun ExpandedSheet(
     repeatState: RepeatState,
     onRepeatStateChanged: () -> Unit,
     valueChanging: () -> Unit,
-    collapse: () -> Unit,
+    collapse: () -> Unit
 ) {
 
-    val pagerState = rememberPagerState()
-
-    LaunchedEffect(key1 = currentPlayingMusic) {
-        pagerState.animateScrollToPage(data.indexOf(currentPlayingMusic))
-    }
-
-    Column(modifier = Modifier.fillMaxSize()) {
-        ExpandedPager(modifier = Modifier.weight(1f), collapse = collapse, data = data, pagerState = pagerState)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
+            .background(MaterialTheme.colors.background)
+    ) {
+        ExpandedPager(
+            modifier = Modifier.weight(1f),
+            collapse = collapse,
+            music = currentPlayingMusic
+        )
         Spacer(Modifier.height(10.dp))
         Seeker(
             music = currentPlayingMusic,
@@ -57,6 +63,7 @@ fun ExpandedSheet(
             repeatState = repeatState,
             onRepeatStateChanged = onRepeatStateChanged
         )
+        Spacer(Modifier.height(15.dp))
     }
 
 }
@@ -93,7 +100,7 @@ fun Seeker(
         colors = SliderDefaults.colors(
             thumbColor = Blue,
             activeTrackColor = Blue,
-            inactiveTrackColor = LightBlue,
+            inactiveTrackColor = LightBlue.copy(alpha = 0.3f),
         ),
         onValueChangeFinished = {
             onValueChangedFinished(seekbarValue)
@@ -121,7 +128,7 @@ fun Seeker(
             onRepeatStateChanged()
         }) {
             Icon(
-                modifier = Modifier.size(38.dp),
+                modifier = Modifier.size(25.dp),
                 painter = painterResource(
                     id = when(repeatState) {
                         RepeatState.RepeatPlaylist -> R.drawable.ic_repeat
@@ -136,7 +143,7 @@ fun Seeker(
         }
         IconButton(onClick = { onPrevNextClick(false) }) {
             Icon(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(25.dp),
                 painter = painterResource(id = R.drawable.ic_previous),
                 contentDescription = null,
                 tint = Light
@@ -144,24 +151,24 @@ fun Seeker(
         }
         IconButton(onClick = { onPlayPauseClick(isPlaying, music) }) {
             Icon(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(25.dp),
                 painter = painterResource(id = if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play),
-                contentDescription = null,
-                tint = Light
-            )
-        }
-        IconButton(onClick = { addToPlaylist(music) }) {
-            Icon(
-                modifier = Modifier.size(33.dp),
-                painter = painterResource(id = R.drawable.ic_add_playlist),
                 contentDescription = null,
                 tint = Light
             )
         }
         IconButton(onClick = { onPrevNextClick(true) }) {
             Icon(
-                modifier = Modifier.size(28.dp),
+                modifier = Modifier.size(25.dp),
                 painter = painterResource(id = R.drawable.ic_next),
+                contentDescription = null,
+                tint = Light
+            )
+        }
+        IconButton(onClick = { addToPlaylist(music) }) {
+            Icon(
+                modifier = Modifier.size(25.dp),
+                painter = painterResource(id = R.drawable.ic_add_playlist),
                 contentDescription = null,
                 tint = Light
             )
