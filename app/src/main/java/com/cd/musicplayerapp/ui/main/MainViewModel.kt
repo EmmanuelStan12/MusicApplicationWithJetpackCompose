@@ -11,11 +11,8 @@ import com.cd.musicplayerapp.domain.Resource
 import com.cd.musicplayerapp.exoplayer.currentPlaybackPosition
 import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -36,6 +33,8 @@ class MainViewModel @Inject constructor(
     val currentPlayerPosition: State<Long> = _currentPlayerPosition
 
     val shouldUpdateSeekbarPosition = mutableStateOf(true)
+
+    private var job: Job? = null
 
     init {
         subscribeToMusic()
@@ -117,7 +116,14 @@ class MainViewModel @Inject constructor(
     }
 
     fun onSearchQueryChanged(query: String) = viewModelScope.launch {
-        _state.value = state.value.copy()
+        _state.value = state.value.copy(searchValue = query)
+        job?.cancel()
+        job = viewModelScope.launch(Dispatchers.IO) {
+            delay(2000L)
+            repository.searchSongs(state.value.searchValue).collectLatest {
+                _state.value = state.value.copy(musicList = it)
+            }
+        }
 
     }
 

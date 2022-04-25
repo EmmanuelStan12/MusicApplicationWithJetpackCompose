@@ -68,7 +68,7 @@ fun CollapsedSheet(
                 )
                 Spacer(Modifier.height(5.dp))
                 Text(
-                    text = music.artists.joinToString(" ,"),
+                    text = music.artists.joinToString(" "),
                     style = MaterialTheme.typography.body1,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

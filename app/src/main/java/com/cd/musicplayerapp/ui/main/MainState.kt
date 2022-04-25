@@ -8,7 +8,8 @@ data class MainState(
     val loading: Boolean = false,
     val error: String = "",
     val ready: Boolean = false,
-    val musicList: List<Music> = emptyList()
+    val musicList: List<Music> = emptyList(),
+    val searchValue: String = ""
 )
 
 enum class MusicState {

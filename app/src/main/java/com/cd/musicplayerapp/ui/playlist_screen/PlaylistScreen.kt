@@ -5,7 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 fun PlaylistScreen(
-    viewModel: PlaylistViewModel = hiltViewModel()
+    
 ) {
 
 }

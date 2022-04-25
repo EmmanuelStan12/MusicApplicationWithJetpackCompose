@@ -57,12 +57,12 @@ fun Navigation(viewModel: MainViewModel = hiltViewModel()) {
                 HomeScreen(
                     loading = state.loading,
                     data = state.musicList,
-                    searchValue = "",
-                    onSearchValueChanged = {},
+                    searchValue = state.searchValue,
+                    onSearchValueChanged = viewModel::onSearchQueryChanged,
                     currentPlayingMusic = state.currentPlayingMusic,
                     scope = scope,
                     musicState = state.musicState,
-                    onPlayPausePressed = viewModel::onMusicListItemPressed,
+                    onPlayPausePressed = viewModel::onPlayPauseButtonPressed,
                     onClick = {
                         scope.launch {
                             if (it._mediaId == state.currentPlayingMusic?._mediaId) {
