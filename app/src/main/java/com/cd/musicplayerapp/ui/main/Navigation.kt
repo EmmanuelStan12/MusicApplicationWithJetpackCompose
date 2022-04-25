@@ -47,7 +47,8 @@ fun Navigation(viewModel: MainViewModel = hiltViewModel()) {
                 seekTo = viewModel::seekTo,
                 onValueChanged = viewModel::onValueChanged,
                 currentPlayerPosition = viewModel.currentPlayerPosition.value,
-                onNextPrevClicked = viewModel::onNextPrevClicked
+                onNextPrevClicked = viewModel::onNextPrevClicked,
+                onRepeatStateChanged = viewModel::onRepeatStateChanged,
             )
         },
         sheetPeekHeight = 70.dp,

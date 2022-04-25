@@ -20,6 +20,7 @@ import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
+import com.cd.musicplayerapp.data.MusicDatasource
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
@@ -37,7 +38,7 @@ fun MusicItem(
 ) {
 
     val colors = MaterialTheme.colors
-    val painter = rememberImagePainter(music.imageUri)
+    val painter = rememberImagePainter(MusicDatasource.loadMusicImageUri(music.musicUri))
 
     Row(
         modifier = modifier

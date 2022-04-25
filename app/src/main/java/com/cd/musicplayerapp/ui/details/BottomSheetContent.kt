@@ -24,7 +24,8 @@ fun ColumnScope.BottomSheetContent(
     seekTo: (Long) -> Unit,
     onValueChanged: () -> Unit,
     currentPlayerPosition: Long,
-    onNextPrevClicked: (Boolean) -> Unit
+    onNextPrevClicked: (Boolean) -> Unit,
+    onRepeatStateChanged: () -> Unit
 ) {
 
     val context = LocalContext.current
@@ -51,7 +52,7 @@ fun ColumnScope.BottomSheetContent(
     }
     AnimatedVisibility(visible = bottomSheetScaffoldState.bottomSheetState.isExpanded) {
         ExpandedSheet(
-            music = state.currentPlayingMusic ?: run {
+            currentPlayingMusic = state.currentPlayingMusic ?: run {
                 if (state.musicList.isNotEmpty()) state.musicList[0]
                 else emptyMusic
             },
@@ -64,8 +65,11 @@ fun ColumnScope.BottomSheetContent(
             onPrevNextClick = {
                 onNextPrevClicked(it)
             },
-            onFastForwardRewindClick = { },
-            isPlaying = state.musicState == MusicState.PLAYING
+            addToPlaylist = {},
+            repeatState = state.repeatState,
+            onRepeatStateChanged = onRepeatStateChanged,
+            isPlaying = state.musicState == MusicState.PLAYING,
+            data = state.musicList
         ) {
             scope.launch {
                 bottomSheetScaffoldState.bottomSheetState.collapse()

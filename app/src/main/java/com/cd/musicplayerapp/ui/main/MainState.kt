@@ -9,9 +9,14 @@ data class MainState(
     val error: String = "",
     val ready: Boolean = false,
     val musicList: List<Music> = emptyList(),
-    val searchValue: String = ""
+    val searchValue: String = "",
+    val repeatState: RepeatState = RepeatState.RepeatPlaylist
 )
 
 enum class MusicState {
     PLAYING, PAUSED, NONE
+}
+
+enum class RepeatState {
+    RepeatPlaylist, RepeatCurrentSong, ShufflePlaylist, PlayPlaylistOnce
 }

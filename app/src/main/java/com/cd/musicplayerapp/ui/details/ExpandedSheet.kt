@@ -1,144 +1,61 @@
 package com.cd.musicplayerapp.ui.details
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.annotation.ExperimentalCoilApi
-import coil.compose.ImagePainter
-import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
-import com.cd.musicplayerapp.ui.theme.Black
+import com.cd.musicplayerapp.ui.components.ExpandedPager
+import com.cd.musicplayerapp.ui.main.RepeatState
+import com.cd.musicplayerapp.ui.theme.Blue
 import com.cd.musicplayerapp.ui.theme.Light
+import com.cd.musicplayerapp.ui.theme.LightBlue
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.rememberPagerState
 
-@OptIn(ExperimentalCoilApi::class)
+@OptIn(ExperimentalCoilApi::class, ExperimentalPagerApi::class)
 @Composable
 fun ExpandedSheet(
-    music: Music,
+    currentPlayingMusic: Music,
+    data: List<Music>,
     isPlaying: Boolean,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
     onValueChangedFinished: (Long) -> Unit,
     currentPlayerPosition: Long,
-    onFastForwardRewindClick: (Boolean) -> Unit,
+    addToPlaylist: (Music) -> Unit,
+    repeatState: RepeatState,
+    onRepeatStateChanged: () -> Unit,
     valueChanging: () -> Unit,
     collapse: () -> Unit,
 ) {
 
-    val painter = rememberImagePainter(music.imageUri)
+    val pagerState = rememberPagerState()
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
-            .background(MaterialTheme.colors.background),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Spacer(modifier = Modifier.height(10.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 15.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.Center)
-                    .fillMaxWidth(0.3f)
-                    .height(5.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(
-                        Light.copy(alpha = 0.5f)
-                    )
-            )
-            IconButton(onClick = collapse, modifier = Modifier.align(Alignment.CenterEnd)) {
-                Icon(
-                    modifier = Modifier.size(25.dp),
-                    painter = painterResource(id = R.drawable.ic_arrow_down),
-                    contentDescription = null,
-                    tint = Light
-                )
-            }
-        }
+    LaunchedEffect(key1 = currentPlayingMusic) {
+        pagerState.animateScrollToPage(data.indexOf(currentPlayingMusic))
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        ExpandedPager(modifier = Modifier.weight(1f), collapse = collapse, data = data, pagerState = pagerState)
         Spacer(Modifier.height(10.dp))
-        Text(text = music.album, style = MaterialTheme.typography.h4)
-        Spacer(Modifier.height(10.dp))
-        when (painter.state) {
-            is ImagePainter.State.Success -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .fillMaxHeight(0.5f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Black),
-                ) {
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center)
-                    )
-                }
-            }
-            else -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .fillMaxHeight(0.5f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Black),
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_headphones),
-                        contentDescription = null,
-                        tint = Light,
-                        modifier = Modifier
-                            .fillMaxSize(0.8f)
-                            .align(Alignment.Center)
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-            text = music.title,
-            style = MaterialTheme.typography.h3,
-            modifier = Modifier.padding(horizontal = 15.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
-        Spacer(Modifier.height(10.dp))
-        Text(
-            text = music.artists.joinToString(" "),
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(horizontal = 15.dp),
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
         Seeker(
-            music = music,
+            music = currentPlayingMusic,
             isPlaying = isPlaying,
             onPlayPauseClick = onPlayPauseClick,
-            onFastForwardRewindClick = onFastForwardRewindClick,
             onPrevNextClick = onPrevNextClick,
             currentPlayerPosition = currentPlayerPosition,
             onValueChangedFinished = onValueChangedFinished,
-            valueChanging = valueChanging
+            valueChanging = valueChanging,
+            addToPlaylist = addToPlaylist,
+            repeatState = repeatState,
+            onRepeatStateChanged = onRepeatStateChanged
         )
     }
 
@@ -150,10 +67,12 @@ fun Seeker(
     isPlaying: Boolean,
     onPlayPauseClick: (Boolean, Music) -> Unit,
     onPrevNextClick: (Boolean) -> Unit,
-    onFastForwardRewindClick: (Boolean) -> Unit,
+    addToPlaylist: (Music) -> Unit,
     currentPlayerPosition: Long,
     onValueChangedFinished: (Long) -> Unit,
-    valueChanging: () -> Unit
+    valueChanging: () -> Unit,
+    repeatState: RepeatState,
+    onRepeatStateChanged: () -> Unit
 ) {
 
     var seekbarValue by remember {
@@ -172,7 +91,9 @@ fun Seeker(
             valueChanging()
         },
         colors = SliderDefaults.colors(
-
+            thumbColor = Blue,
+            activeTrackColor = Blue,
+            inactiveTrackColor = LightBlue,
         ),
         onValueChangeFinished = {
             onValueChangedFinished(seekbarValue)
@@ -196,18 +117,27 @@ fun Seeker(
             .fillMaxWidth()
             .padding(horizontal = 15.dp)
     ) {
-        IconButton(onClick = { onPrevNextClick(false) }) {
+        IconButton(onClick = {
+            onRepeatStateChanged()
+        }) {
             Icon(
-                modifier = Modifier.size(28.dp),
-                painter = painterResource(id = R.drawable.ic_previous),
+                modifier = Modifier.size(38.dp),
+                painter = painterResource(
+                    id = when(repeatState) {
+                        RepeatState.RepeatPlaylist -> R.drawable.ic_repeat
+                        RepeatState.RepeatCurrentSong -> R.drawable.ic_repeat_one
+                        RepeatState.PlayPlaylistOnce -> R.drawable.ic_play_next_song
+                        RepeatState.ShufflePlaylist -> R.drawable.ic_shuffle_icon
+                    }
+                ),
                 contentDescription = null,
                 tint = Light
             )
         }
-        IconButton(onClick = { onFastForwardRewindClick(false) }) {
+        IconButton(onClick = { onPrevNextClick(false) }) {
             Icon(
-                modifier = Modifier.size(37.dp),
-                painter = painterResource(id = R.drawable.ic_rewind),
+                modifier = Modifier.size(28.dp),
+                painter = painterResource(id = R.drawable.ic_previous),
                 contentDescription = null,
                 tint = Light
             )
@@ -220,10 +150,10 @@ fun Seeker(
                 tint = Light
             )
         }
-        IconButton(onClick = { onFastForwardRewindClick(true) }) {
+        IconButton(onClick = { addToPlaylist(music) }) {
             Icon(
                 modifier = Modifier.size(33.dp),
-                painter = painterResource(id = R.drawable.ic_fast_forward),
+                painter = painterResource(id = R.drawable.ic_add_playlist),
                 contentDescription = null,
                 tint = Light
             )

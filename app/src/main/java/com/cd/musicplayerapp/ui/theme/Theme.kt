@@ -7,7 +7,12 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val ColorPalette = darkColors()
+private val ColorPalette = darkColors(
+    primary = Blue,
+    primaryVariant = DarkBlue,
+    secondary = Blue,
+    secondaryVariant = Blue
+)
 
 @Composable
 fun MusicPlayerAppTheme(

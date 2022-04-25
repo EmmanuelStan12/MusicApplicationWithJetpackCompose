@@ -87,8 +87,8 @@ fun LazyListScope.musicItems(
         )
         Spacer(Modifier.height(10.dp))
         Searchbar(
-            value = "",
-            onValueChange = {}
+            value = searchValue,
+            onValueChange = onSearchValueChanged
         )
         Spacer(Modifier.height(10.dp))
     }

@@ -52,6 +52,21 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun onRepeatStateChanged() {
+        val values = RepeatState.values()
+        val currentValue = state.value.repeatState.ordinal
+        val nextValue = currentValue + 1
+        if(nextValue > RepeatState.PlayPlaylistOnce.ordinal) {
+            _state.value = state.value.copy(repeatState = RepeatState.RepeatPlaylist)
+            return
+        }
+        values.forEach {
+            if(it.ordinal == nextValue) {
+                _state.value = state.value.copy(repeatState = it)
+            }
+        }
+    }
+
     fun seekTo(value: Long) = viewModelScope.launch {
         useCase.seekTo(value)
         _currentPlayerPosition.value = value

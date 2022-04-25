@@ -3,6 +3,9 @@ package com.cd.musicplayerapp.data
 import android.content.ContentUris
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
@@ -13,9 +16,9 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
+
 
 @Singleton
 class MusicDatasource @Inject constructor(
@@ -74,10 +77,8 @@ class MusicDatasource @Inject constructor(
             val musicUri =
                 ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
             val imageUri = getAlbumArt(albumId).toString()
-            val displayName = getString(columnDisplayName)
             val size = getString(columnSize)
             val album = getString(columnAlbum)
-            Timber.d("music with id = $id has artists $artists and $imageUri and $displayName and $size and $album")
             musicList.add(
                 Music(
                     id.toString(),
@@ -94,6 +95,20 @@ class MusicDatasource @Inject constructor(
         }
         Timber.d("Extensions ${musicList.joinToString(" ,")}")
         return musicList
+    }
+
+    companion object {
+        fun loadMusicImageUri(uri: String): Bitmap? {
+            val mediaMetadataRetriever = MediaMetadataRetriever()
+            mediaMetadataRetriever.setDataSource(uri, HashMap())
+            return try {
+                val coverImage = mediaMetadataRetriever.embeddedPicture
+                BitmapFactory.decodeByteArray(coverImage, 0, coverImage!!.size)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
     }
 
     private fun getAlbumArt(album_id: Long) =
