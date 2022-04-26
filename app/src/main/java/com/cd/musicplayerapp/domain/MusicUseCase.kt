@@ -18,10 +18,10 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
     val currentSong = musicConnection.currentSong
     val playbackState = musicConnection.playbackState
 
-    suspend fun subscribeToService(): Resource<List<MediaBrowserCompat.MediaItem>> =
+    suspend fun subscribeToService(parentId: String = MEDIA_ROOT_ID): Resource<List<MediaBrowserCompat.MediaItem>> =
         suspendCoroutine { continuation ->
             musicConnection.subscribe(
-                MEDIA_ROOT_ID,
+                parentId,
                 object : MediaBrowserCompat.SubscriptionCallback() {
                     override fun onChildrenLoaded(
                         parentId: String,
@@ -40,7 +40,7 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
             )
         }
 
-    fun unsubscribeToService() = musicConnection.unsubscribe(MEDIA_ROOT_ID)
+    fun unsubscribeToService(parentId: String = MEDIA_ROOT_ID) = musicConnection.unsubscribe(parentId)
 
     fun skipToNextTrack() = musicConnection.skipToNextTrack()
 

@@ -7,6 +7,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.core.os.bundleOf
 import com.cd.musicplayerapp.domain.Resource
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 class MusicServiceConnection @Inject constructor(
@@ -52,7 +54,8 @@ class MusicServiceConnection @Inject constructor(
     val playbackState = _playbackState.asStateFlow()
 
     fun subscribe(parentId: String, callbacks: MediaBrowserCompat.SubscriptionCallback) {
-        mediaBrowser.subscribe(parentId, callbacks)
+        Timber.d("parentId $parentId")
+        mediaBrowser.subscribe(parentId, bundleOf("parentId" to parentId), callbacks)
     }
 
     fun unsubscribe(parentId: String) {
@@ -107,7 +110,7 @@ class MusicServiceConnection @Inject constructor(
         override fun onSessionEvent(event: String?, extras: Bundle?) {
             super.onSessionEvent(event, extras)
             coroutineScope.launch {
-                _connectionEvent.emit(Resource.Error(event ?: "an unknown error occured"))
+                _connectionEvent.emit(Resource.Error(event ?: "an unknown error occurred"))
             }
         }
 

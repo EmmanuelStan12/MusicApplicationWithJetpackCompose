@@ -26,8 +26,7 @@
                 <action android:name="android.media.browse.MediaBrowserService" />
             </intent-filter>
         </service>
-        <receiver android:name=".receiver.AlarmReceiver"
-            android:exported="true">
+        <receiver android:name=".receiver.AlarmReceiver">
         </receiver>
         <activity
             android:name=".MainActivity"

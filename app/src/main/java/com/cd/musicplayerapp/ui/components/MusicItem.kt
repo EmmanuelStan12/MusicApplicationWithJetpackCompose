@@ -28,6 +28,7 @@ import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
+import timber.log.Timber
 
 @OptIn(ExperimentalCoilApi::class)
 @Composable
@@ -42,7 +43,7 @@ fun MusicItem(
 
     val colors = MaterialTheme.colors
     val context = LocalContext.current
-    val painter = rememberImagePainter(context.loadMusicImageUri(music.musicUri.toUri()))
+    val painter = rememberImagePainter(music.bitmap)
 
     Row(
         modifier = modifier
@@ -75,6 +76,7 @@ fun MusicItem(
                     Image(painter = painter, contentDescription = null)
                 }
                 is ImagePainter.State.Error -> {
+                    Timber.d("error ${(painter.state as ImagePainter.State.Error).result.throwable}")
                     Icon(
                         painter = painterResource(R.drawable.ic_noise),
                         contentDescription = null,
@@ -83,12 +85,8 @@ fun MusicItem(
                     )
                 }
                 ImagePainter.State.Empty -> {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_noise),
-                        contentDescription = null,
-                        tint = colors.background,
-                        modifier = Modifier.size(30.dp)
-                    )
+                    Timber.d("Empty")
+                    Image(painter = painter, contentDescription = null)
                 }
             }
         }

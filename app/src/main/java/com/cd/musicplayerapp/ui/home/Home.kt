@@ -105,7 +105,8 @@ fun LazyListScope.musicItems(
                     onClick(it)
                     onPlayPausePressed(it)
                 }
-            }
+            },
+            bottomPadding = if(index == list.size - 1) 90.dp else 10.dp
         )
     }
 }

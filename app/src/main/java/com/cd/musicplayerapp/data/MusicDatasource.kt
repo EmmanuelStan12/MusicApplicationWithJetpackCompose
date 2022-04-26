@@ -10,7 +10,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
+import androidx.core.net.toUri
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.exoplayer.sArtworkUri
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +59,7 @@ class MusicDatasource @Inject constructor(
         musicList
     }
 
-    private fun Cursor.getMusic(): List<Music> {
+    private suspend fun Cursor.getMusic(): List<Music> {
 
         val musicList = mutableListOf<Music>()
         val columnID = getColumnIndexOrThrow(MediaStore.Audio.Media._ID)
@@ -65,7 +67,6 @@ class MusicDatasource @Inject constructor(
         val columnTitle = getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
         val columnDuration = getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
         val columnArtist = getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
-        val columnDisplayName = getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME)
         val columnSize = getColumnIndexOrThrow(MediaStore.Audio.Media.SIZE)
         val columnAlbum = getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
         while (moveToNext()) {
@@ -76,20 +77,19 @@ class MusicDatasource @Inject constructor(
             val artists = getString(columnArtist).split(" ")
             val musicUri =
                 ContentUris.withAppendedId(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, id)
-            val imageUri = getAlbumArt(albumId).toString()
+            val bitmap = context.loadMusicImageUri(musicUri.toString())
             val size = getString(columnSize)
             val album = getString(columnAlbum)
             musicList.add(
                 Music(
-                    id.toString(),
-                    title,
-                    duration,
-                    artists,
-                    imageUri,
-                    musicUri.toString(),
-                    0L,
-                    album,
-                    size
+                    _mediaId = id.toString(),
+                    title = title,
+                    duration = duration,
+                    artists = artists,
+                    musicUri = musicUri.toString(),
+                    bitmap = bitmap,
+                    album = album,
+                    size = size
                 )
             )
         }

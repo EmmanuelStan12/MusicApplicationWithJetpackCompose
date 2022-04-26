@@ -8,7 +8,7 @@ class AlarmReceiver: BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         Intent(context, AlarmService::class.java).also {
-            context?.startForegroundService(it)
+            context?.startService(it)
         }
     }
 }

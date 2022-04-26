@@ -135,7 +135,7 @@ class MainViewModel @Inject constructor(
         _state.value = state.value.copy(searchValue = query)
         job?.cancel()
         job = viewModelScope.launch(Dispatchers.IO) {
-            delay(2000L)
+            delay(500L)
             repository.searchSongs(state.value.searchValue).collectLatest {
                 _state.value = state.value.copy(musicList = it)
             }

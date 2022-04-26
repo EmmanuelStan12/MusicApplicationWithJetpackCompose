@@ -1,5 +1,6 @@
 package com.cd.musicplayerapp.domain
 
+import android.graphics.Bitmap
 import com.cd.musicplayerapp.data.MusicEntity
 
 data class Music(
@@ -7,23 +8,20 @@ data class Music(
     val title: String,
     val duration: Long,
     val artists: List<String>,
-    val imageUri: String,
+    val bitmap: Bitmap?,
     val musicUri: String,
-    val lastPlaybackPosition: Long = 0L,
     val album: String = "",
     val size: String = ""
 )
 
 fun Music.toMusicEntity() = MusicEntity(
-    _mediaId,
-    title,
-    duration,
-    artists,
-    imageUri,
-    musicUri,
-    lastPlaybackPosition,
-    album,
-    size
+    _id = _mediaId,
+    title = title,
+    duration = duration,
+    artists = artists,
+    musicUri = musicUri,
+    album = album,
+    size = size
 )
 
 val emptyMusic = Music(
@@ -31,6 +29,6 @@ val emptyMusic = Music(
     "",
     0L,
     emptyList<String>(),
-    "",
+    null,
     ""
 )

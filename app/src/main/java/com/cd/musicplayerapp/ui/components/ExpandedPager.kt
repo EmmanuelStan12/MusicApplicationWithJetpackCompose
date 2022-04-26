@@ -73,7 +73,7 @@ fun HorizontalPagerItem(
     music: Music
 ) {
     val context = LocalContext.current
-    val painter = rememberImagePainter(context.loadMusicImageUri(music.musicUri.toUri()))
+    val painter = rememberImagePainter(music.bitmap)
 
     Column(
         modifier = Modifier

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import dagger.hilt.android.qualifiers.ApplicationContext
+import timber.log.Timber
 import javax.inject.Inject
 
 private const val REQUEST_CODE = 0
@@ -26,7 +27,7 @@ class MusicAlarmManager @Inject constructor(
         alarmManager?.setInexactRepeating(
             AlarmManager.ELAPSED_REALTIME_WAKEUP,
             SystemClock.elapsedRealtime() + AlarmManager.INTERVAL_FIFTEEN_MINUTES,
-            AlarmManager.INTERVAL_HALF_DAY,
+            AlarmManager.INTERVAL_FIFTEEN_MINUTES,
             alarmManagerPendingIntent
         )
     }

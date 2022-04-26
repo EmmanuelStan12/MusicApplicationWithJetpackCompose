@@ -44,12 +44,16 @@ class LocalMediaSource @Inject constructor(
 
     }
 
+    override fun filter(id: String) {
+        parentId = id
+    }
+
     private suspend fun updateCatalog(): List<MediaMetadataCompat> {
         return withContext(Dispatchers.IO) {
             val songs = source.loadLocalMusic()
             dao.cacheSongs(songs.map { it.toMusicEntity() })
             songs.map { music ->
-                val ( _mediaId, title, duration, artists, imageUri, musicUri, length, album, size ) = music
+                val ( _mediaId, title, duration, artists, bitmap, musicUri, album, size ) = music
 
 
                 MediaMetadataCompat.Builder()
@@ -58,7 +62,7 @@ class LocalMediaSource @Inject constructor(
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, _mediaId)
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
-                    .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, imageUri)
+                    .putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, bitmap)
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, musicUri)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)

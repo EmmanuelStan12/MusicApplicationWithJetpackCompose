@@ -8,8 +8,6 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
-import android.support.v4.media.session.PlaybackStateCompat
-import android.support.v4.media.session.PlaybackStateCompat.ACTION_PLAY_PAUSE
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
@@ -18,15 +16,14 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
-import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 private const val TAG = "MediaPlaybackService"
 
@@ -137,6 +134,9 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
+        Timber.d("client package $clientPackageName")
+        Timber.d("hints $rootHints")
+        Timber.d("client uid $clientUid")
         return if(allowBrowsing(clientPackageName, clientUid)) {
             // Returns a root ID that clients can use with onLoadChildren() to retrieve
             // the content hierarchy.
@@ -196,21 +196,45 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        val resultSent = musicSource.whenReady { isInitialized ->
-            if(isInitialized) {
-                result.sendResult(musicSource.asMediaItems().toMutableList())
-                if(!isPlayerInitialized && !musicSource.isEmpty()) {
-                    preparePlayer(
-                        musicSource.songs,
-                        musicSource.songs[0],
-                        false
-                    )
+        Timber.d("parentId $parentId")
+        when (parentId) {
+            MEDIA_ROOT_ID -> {
+                val resultSent = musicSource.whenReady { isInitialized ->
+                    if (isInitialized) {
+                        result.sendResult(musicSource.asMediaItems().toMutableList())
+                        if (!isPlayerInitialized && !musicSource.isEmpty()) {
+                            preparePlayer(
+                                musicSource.songs,
+                                musicSource.songs[0],
+                                false
+                            )
+                        }
+                    } else {
+                        result.sendResult(null)
+                    }
                 }
-            } else {
-                result.sendResult(null)
+                if (!resultSent) result.detach()
+            }
+            else -> {
+                val resultSent = musicSource.whenReady { isInitialized ->
+                    if (isInitialized) {
+                        result.sendResult(
+                            musicSource.filteredMediaItemsByParentId(parentId).toMutableList()
+                        )
+                        if (!isPlayerInitialized && !musicSource.filteredSongs.isEmpty()) {
+                            preparePlayer(
+                                musicSource.filteredSongs,
+                                musicSource.filteredSongs[0],
+                                false
+                            )
+                        }
+                    } else {
+                        result.sendResult(null)
+                    }
+                }
+                if (!resultSent) result.detach()
             }
         }
-        if(!resultSent) result.detach()
     }
 
     private inner class PlayerNotificationListener: PlayerNotificationManager.NotificationListener {

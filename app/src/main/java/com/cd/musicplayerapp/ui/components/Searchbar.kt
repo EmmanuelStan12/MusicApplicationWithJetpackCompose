@@ -39,12 +39,14 @@ fun Searchbar(
             contentDescription = null,
             tint = Light
         )
+        Spacer(modifier = Modifier.width(7.dp))
         Box(modifier = Modifier.weight(1f)) {
-            //if(value.isBlank()) Text(text = "Search...", style = )
+            if(value.isBlank()) Text(text = "Search...", style = MaterialTheme.typography.button.copy(color = Light))
             BasicTextField(
                 value = value,
                 onValueChange = onValueChange,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                textStyle = MaterialTheme.typography.button.copy(color = Light)
             )
         }
     }
