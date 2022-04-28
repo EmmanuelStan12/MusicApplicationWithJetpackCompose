@@ -1,5 +1,6 @@
 package com.cd.musicplayerapp.ui.main
 
+import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import com.cd.musicplayerapp.exoplayer.getMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collectLatest
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,6 +42,11 @@ class MainViewModel @Inject constructor(
         subscribeToMusic()
         collectCurrentSong()
         collectPlayBackState()
+        viewModelScope.launch {
+            useCase.connectionState.collect {
+                Timber.d("connection state $it")
+            }
+        }
     }
 
     fun updateCurrentPlayerPosition() = viewModelScope.launch {
@@ -52,19 +59,23 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    fun changeAlbum(album: String) {
+        _state.value = state.value.copy(currentSelectedAlbum = album)
+    }
+
     fun onRepeatStateChanged() {
-        val values = RepeatState.values()
-        val currentValue = state.value.repeatState.ordinal
-        val nextValue = currentValue + 1
-        if(nextValue > RepeatState.PlayPlaylistOnce.ordinal) {
-            _state.value = state.value.copy(repeatState = RepeatState.RepeatPlaylist)
-            return
+        val currentRepeatMode = state.value.repeatMode
+        val currentRepeatModeIndex = repeatModeList.indexOf(currentRepeatMode)
+        val nextRepeatModeIndex = if((currentRepeatModeIndex + 1) >= repeatModeList.size)
+            0 else currentRepeatModeIndex + 1
+        if(nextRepeatModeIndex == repeatModeList.lastIndex) {
+            useCase.changeRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+            useCase.changeShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
+        } else {
+            useCase.changeRepeatMode(repeatModeList[nextRepeatModeIndex])
+            useCase.changeShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
         }
-        values.forEach {
-            if(it.ordinal == nextValue) {
-                _state.value = state.value.copy(repeatState = it)
-            }
-        }
+        _state.value = state.value.copy(repeatMode = repeatModeList[nextRepeatModeIndex])
     }
 
     fun playFromMediaId(music: Music) {
@@ -105,8 +116,13 @@ class MainViewModel @Inject constructor(
                 _state.value = state.value.copy(loading = true)
             }
             val resource = useCase.subscribeToService()
-            if (resource is Resource.Success) {
-                collectSongs()
+            Timber.d("resource mainview model ${resource.error} ${resource.data} ${resource.loading}")
+            when (resource) {
+                is Resource.Success -> collectSongs()
+                is Resource.Error -> Timber.d("error ${resource.error}")
+                is Resource.Loading -> {
+                    Timber.d("some thing else is happening")
+                }
             }
 
         }
@@ -123,6 +139,7 @@ class MainViewModel @Inject constructor(
 
     private suspend fun collectSongs() {
         repository.getAllSongs().also {
+            Timber.d("list ${it.joinToString(" ")}")
             _state.value = state.value.copy(musicList = it, loading = false)
         }
     }

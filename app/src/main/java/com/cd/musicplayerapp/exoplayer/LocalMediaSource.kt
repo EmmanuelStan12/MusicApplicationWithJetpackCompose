@@ -20,6 +20,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import javax.inject.Inject
 
 class LocalMediaSource @Inject constructor(
@@ -55,14 +56,12 @@ class LocalMediaSource @Inject constructor(
             songs.map { music ->
                 val ( _mediaId, title, duration, artists, bitmap, musicUri, album, size ) = music
 
-
                 MediaMetadataCompat.Builder()
                     .putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artists.joinToString(" "))
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION, artists.joinToString(" "))
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID, _mediaId)
                     .putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                     .putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE, title)
-                    .putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI, bitmap)
                     .putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI, musicUri)
                     .putLong(MediaMetadataCompat.METADATA_KEY_DURATION, duration)
                     .putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)

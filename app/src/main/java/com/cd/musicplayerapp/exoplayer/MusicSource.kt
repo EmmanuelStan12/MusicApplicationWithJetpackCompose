@@ -19,6 +19,8 @@ interface MusicSource : Iterable<MediaMetadataCompat> {
 
     val filteredSongs: List<MediaMetadataCompat>
 
+    val shuffledSongs: MutableList<MediaMetadataCompat>
+
     fun filter(id: String)
 
     /**
@@ -33,14 +35,6 @@ interface MusicSource : Iterable<MediaMetadataCompat> {
      * the source was successfully prepared 'false' indicates an error occurred
      * */
     fun whenReady(performAction: (Boolean) -> Unit): Boolean
-
-    fun asMediaSource(dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource
-
-    fun asMediaItems(): List<MediaBrowserCompat.MediaItem>
-
-    fun filteredMediaSourceByParentId(parentId: String, dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource
-
-    fun filteredMediaItemsByParentId(parentId: String): List<MediaBrowserCompat.MediaItem>
 
 }
 
@@ -89,6 +83,13 @@ abstract class AbstractMusicSource: MusicSource {
             it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM) == parentId
         }
 
+    override val shuffledSongs: MutableList<MediaMetadataCompat>
+        get() {
+            val newSongs = ArrayList(catalog)
+            newSongs.shuffle()
+            return newSongs
+        }
+
     @State
     var state: Int = STATE_CREATED
     set(value) {
@@ -124,22 +125,24 @@ abstract class AbstractMusicSource: MusicSource {
             }
         }
     }
+}
 
-    override fun asMediaSource(dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource {
-        val concatenatingMediaSource = ConcatenatingMediaSource()
-        catalog.forEach { song ->
-            val mediaItem = MediaItem.Builder()
-                .setUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
-                .setMediaId(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID))
-                .build()
-            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(mediaItem)
-            concatenatingMediaSource.addMediaSource(mediaSource)
-        }
-        return concatenatingMediaSource
+fun <T : List<MediaMetadataCompat>> T.asMediaSource(dataSourceFactory: DefaultDataSource.Factory): ConcatenatingMediaSource {
+    val concatenatingMediaSource = ConcatenatingMediaSource()
+    this.forEach { song ->
+        val mediaItem = MediaItem.Builder()
+            .setUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
+            .setMediaId(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID))
+            .build()
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+            .createMediaSource(mediaItem)
+        concatenatingMediaSource.addMediaSource(mediaSource)
     }
+    return concatenatingMediaSource
+}
 
-    override fun asMediaItems() = catalog.map { song ->
+fun <T : List<MediaMetadataCompat>> T.asMediaItems(): List<MediaBrowserCompat.MediaItem> {
+    return this.map { song ->
         val description = MediaDescriptionCompat.Builder()
             .setMediaUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
             .setTitle(song.description.title)
@@ -149,36 +152,5 @@ abstract class AbstractMusicSource: MusicSource {
             .build()
 
         MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
-    }
-
-    override fun filteredMediaItemsByParentId(parentId: String): List<MediaBrowserCompat.MediaItem> {
-        return filteredSongs.map { song ->
-            val description = MediaDescriptionCompat.Builder()
-                .setMediaUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
-                .setTitle(song.description.title)
-                .setSubtitle(song.description.description)
-                .setMediaId(song.description.mediaId)
-                .setIconUri(song.description.iconUri)
-                .build()
-
-            MediaBrowserCompat.MediaItem(description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE)
-        }
-    }
-
-    override fun filteredMediaSourceByParentId(
-        parentId: String,
-        dataSourceFactory: DefaultDataSource.Factory
-    ): ConcatenatingMediaSource {
-        val concatenatingMediaSource = ConcatenatingMediaSource()
-        filteredSongs.forEach { song ->
-            val mediaItem = MediaItem.Builder()
-                .setUri(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toUri())
-                .setMediaId(song.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID))
-                .build()
-            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(mediaItem)
-            concatenatingMediaSource.addMediaSource(mediaSource)
-        }
-        return concatenatingMediaSource
     }
 }

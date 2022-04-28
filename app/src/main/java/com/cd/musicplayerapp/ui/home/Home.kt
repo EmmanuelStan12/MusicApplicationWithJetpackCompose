@@ -14,7 +14,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.cd.musicplayerapp.domain.Music
+import com.cd.musicplayerapp.ui.Screen
 import com.cd.musicplayerapp.ui.components.MusicItem
 import com.cd.musicplayerapp.ui.components.Searchbar
 import com.cd.musicplayerapp.ui.main.MusicState
@@ -32,7 +34,8 @@ fun HomeScreen(
     scope: CoroutineScope,
     musicState: MusicState,
     onPlayPausePressed: (Music) -> Unit,
-    onClick: (Music) -> Unit
+    onClick: (Music) -> Unit,
+    navController: NavController
 ) {
 
 
@@ -59,7 +62,10 @@ fun HomeScreen(
                     currentPlayingMusic,
                     onPlayPausePressed,
                     onClick,
-                    scope
+                    scope,
+                    onAlbumClicked = {
+                        navController.navigate("${Screen.PlaylistScreen.route}/${it}")
+                    }
                 )
             }
         }
@@ -74,15 +80,18 @@ fun LazyListScope.musicItems(
     currentPlayingMusic: Music?,
     onPlayPausePressed: (Music) -> Unit,
     onClick: (Music) -> Unit,
-    scope: CoroutineScope
+    scope: CoroutineScope,
+    playlistTitle: String = "Hello \uD83D\uDC4B",
+    playlistSubtitle: String = "What you want to hear today?",
+    onAlbumClicked: ((String) -> Unit)? = null
 ) {
     item {
         Text(
-            text = "Hello \uD83D\uDC4B",
+            text = playlistTitle,
             style = MaterialTheme.typography.h3
         )
         Text(
-            text = "What you want to hear today?",
+            text = playlistSubtitle,
             style = MaterialTheme.typography.body1
         )
         Spacer(Modifier.height(10.dp))
@@ -106,7 +115,8 @@ fun LazyListScope.musicItems(
                     onPlayPausePressed(it)
                 }
             },
-            bottomPadding = if(index == list.size - 1) 90.dp else 10.dp
+            bottomPadding = if(index == list.size - 1) 90.dp else 10.dp,
+            onAlbumClicked = onAlbumClicked
         )
     }
 }

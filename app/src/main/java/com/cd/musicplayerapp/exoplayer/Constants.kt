@@ -1,5 +1,7 @@
 package com.cd.musicplayerapp.exoplayer
 
+import android.content.Context
+import android.graphics.Bitmap
 import android.os.SystemClock
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -14,6 +16,8 @@ const val NOTIFICATION_CHANNEL_NAME = "NOTIFICATION_CHANNEL_NAME"
 const val NOTIFICATION_ID = 1
 const val SERVICE_NOTIFICATION_ID = 2
 const val sArtworkUri = "content://media/external/audio/albumart"
+
+const val SHUFFLE = "SHUFFLE"
 
 const val MEDIA_ROOT_ID = "MEDIA_ROOT_ID"
 const val EMPTY_MEDIA_ROOT_ID = "EMPTY_MEDIA_ROOT_ID"
@@ -38,16 +42,14 @@ inline val PlaybackStateCompat.isPlayEnabled
             (actions and PlaybackStateCompat.ACTION_PLAY_PAUSE != 0L &&
                     state == PlaybackStateCompat.STATE_PAUSED)
 
-fun MediaMetadataCompat.getMusic(): Music = run {
-    Timber.d("getting description content ${getString(
-        MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)} album ${getString(
-        MediaMetadataCompat.METADATA_KEY_ALBUM)} size ${getString(METADATA_KEY_SIZE)}")
+fun MediaMetadataCompat.getMusic(context: Context): Music = run {
+    //val bitmap = context.loadMusicImageUri(description.mediaUri.toString())
     Music(
         _mediaId = description.mediaId ?: "",
         title = description.title.toString(),
         duration = getLong(MediaMetadataCompat.METADATA_KEY_DURATION),
         artists = description.description.toString().split(","),
-        imageUri = description.iconUri.toString(),
+        bitmap = null,
         musicUri = description.mediaUri.toString(),
         album = getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
         size = getString(METADATA_KEY_SIZE)

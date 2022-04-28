@@ -179,13 +179,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private fun preparePlayer(
         songs: List<MediaMetadataCompat>,
         itemToPlay: MediaMetadataCompat,
-        playNow: Boolean
+        playNow: Boolean,
+        shuffle: Boolean = false
     ) {
         val currentSongIndex = if(currentPlayingSong == null) 0 else songs.indexOf(itemToPlay)
-        exoPlayer.setMediaSource(musicSource.asMediaSource(dataSourceFactory))
-        exoPlayer.prepare()
-        exoPlayer.seekTo(currentSongIndex, 0L)
-        exoPlayer.playWhenReady = playNow
+        exoPlayer.apply {
+            repeatMode = Player.REPEAT_MODE_ALL
+            setMediaSource(songs.asMediaSource(dataSourceFactory))
+            shuffleModeEnabled = shuffle
+            prepare()
+            seekTo(currentSongIndex, 0L)
+            playWhenReady = playNow
+        }
     }
 
     private fun allowBrowsing(clientPackageName: String, clientUid: Int): Boolean {
@@ -196,12 +201,12 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
-        Timber.d("parentId $parentId")
         when (parentId) {
             MEDIA_ROOT_ID -> {
                 val resultSent = musicSource.whenReady { isInitialized ->
                     if (isInitialized) {
-                        result.sendResult(musicSource.asMediaItems().toMutableList())
+                        //Timber.d("source ${musicSource.songs.joinToString(" ")}")
+                        result.sendResult(musicSource.songs.asMediaItems().toMutableList())
                         if (!isPlayerInitialized && !musicSource.isEmpty()) {
                             preparePlayer(
                                 musicSource.songs,
@@ -215,13 +220,33 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 }
                 if (!resultSent) result.detach()
             }
-            else -> {
+            SHUFFLE -> {
                 val resultSent = musicSource.whenReady { isInitialized ->
                     if (isInitialized) {
                         result.sendResult(
-                            musicSource.filteredMediaItemsByParentId(parentId).toMutableList()
+                            musicSource.shuffledSongs.asMediaItems().toMutableList()
                         )
-                        if (!isPlayerInitialized && !musicSource.filteredSongs.isEmpty()) {
+                        if (!isPlayerInitialized && musicSource.filteredSongs.isNotEmpty()) {
+                            preparePlayer(
+                                musicSource.filteredSongs,
+                                musicSource.filteredSongs[0],
+                                false
+                            )
+                        }
+                    } else {
+                        result.sendResult(null)
+                    }
+                }
+                if (!resultSent) result.detach()
+            }
+            else -> {
+                val resultSent = musicSource.whenReady { isInitialized ->
+                    if (isInitialized) {
+                        musicSource.filter(parentId)
+                        result.sendResult(
+                            musicSource.filteredSongs.asMediaItems().toMutableList()
+                        )
+                        if (!isPlayerInitialized && musicSource.filteredSongs.isNotEmpty()) {
                             preparePlayer(
                                 musicSource.filteredSongs,
                                 musicSource.filteredSongs[0],

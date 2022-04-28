@@ -11,7 +11,7 @@ import timber.log.Timber
 class MusicPlayerEventListener(
     private val showNotification: (Boolean) -> Unit,
     private val stopForeground: (Boolean) -> Unit,
-    private val showMessage: (String) -> Unit
+    private val showMessage: (String) -> Unit,
 ) : Player.Listener {
     override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
         when (playbackState) {

@@ -13,25 +13,26 @@ import com.cd.musicplayerapp.ui.main.MainState
 import com.cd.musicplayerapp.ui.main.MusicState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ColumnScope.BottomSheetContent(
     state: MainState,
-    bottomSheetScaffoldState: BottomSheetScaffoldState,
     onPlayPausePressed: (Music) -> Unit,
-    scope: CoroutineScope,
     seekTo: (Long) -> Unit,
     onValueChanged: () -> Unit,
     currentPlayerPosition: Long,
     onNextPrevClicked: (Boolean) -> Unit,
     onRepeatStateChanged: () -> Unit,
+    isExpanded: Boolean = false,
+    onBottomSheetStateChanged: (Boolean) -> Unit
 ) {
 
     val context = LocalContext.current
 
     AnimatedVisibility(
-        visible = bottomSheetScaffoldState.bottomSheetState.isCollapsed
+        visible = !isExpanded
     ) {
         CollapsedSheet(
             music = state.currentPlayingMusic ?: run {
@@ -45,12 +46,10 @@ fun ColumnScope.BottomSheetContent(
                     .show()
             }
         ) {
-            scope.launch {
-                bottomSheetScaffoldState.bottomSheetState.expand()
-            }
+            onBottomSheetStateChanged(true)
         }
     }
-    AnimatedVisibility(visible = bottomSheetScaffoldState.bottomSheetState.isExpanded) {
+    AnimatedVisibility(visible = isExpanded) {
         ExpandedSheet(
             currentPlayingMusic = state.currentPlayingMusic ?: run {
                 if (state.musicList.isNotEmpty()) state.musicList[0]
@@ -66,13 +65,11 @@ fun ColumnScope.BottomSheetContent(
                 onNextPrevClicked(it)
             },
             addToPlaylist = {},
-            repeatState = state.repeatState,
+            repeatMode = state.repeatMode,
             onRepeatStateChanged = onRepeatStateChanged,
             isPlaying = state.musicState == MusicState.PLAYING,
         ) {
-            scope.launch {
-                bottomSheetScaffoldState.bottomSheetState.collapse()
-            }
+            onBottomSheetStateChanged(false)
         }
     }
 }

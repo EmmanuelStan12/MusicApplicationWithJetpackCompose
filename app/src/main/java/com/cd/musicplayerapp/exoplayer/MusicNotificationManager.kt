@@ -65,8 +65,6 @@ class MusicNotificationManager(
         }
 
         override fun getCurrentContentText(player: Player): CharSequence? {
-            Timber.d("getting description content ${mediaController.metadata.getString(
-                MediaMetadataCompat.METADATA_KEY_DISPLAY_DESCRIPTION)}")
             return mediaController.metadata.description.description
         }
 

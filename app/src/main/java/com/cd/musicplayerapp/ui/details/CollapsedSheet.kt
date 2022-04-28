@@ -21,7 +21,6 @@ import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.ui.theme.BBFontFamily
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
-import timber.log.Timber
 
 @Composable
 fun CollapsedSheet(

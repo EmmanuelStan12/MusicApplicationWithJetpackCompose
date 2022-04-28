@@ -18,8 +18,20 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
     val currentSong = musicConnection.currentSong
     val playbackState = musicConnection.playbackState
 
-    suspend fun subscribeToService(parentId: String = MEDIA_ROOT_ID): Resource<List<MediaBrowserCompat.MediaItem>> =
-        suspendCoroutine { continuation ->
+    val connectionState = musicConnection.connectionEvent
+
+    fun changeShuffleMode(mode: Int) = musicConnection.changeShuffleState(mode)
+
+    fun changeRepeatMode(mode: Int) = musicConnection.changeRepeatState(mode)
+
+    fun getRepeatMode() = musicConnection.repeatMode
+
+    fun getShuffleMode() = musicConnection.shuffleMode
+
+    suspend fun subscribeToService(parentId: String = MEDIA_ROOT_ID): Resource<List<MediaBrowserCompat.MediaItem>> {
+
+        Timber.d("subscription started $parentId")
+        return suspendCoroutine { continuation ->
             musicConnection.subscribe(
                 parentId,
                 object : MediaBrowserCompat.SubscriptionCallback() {
@@ -34,11 +46,14 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
 
                     override fun onError(parentId: String) {
                         super.onError(parentId)
+                        Timber.d("error failed to connect to service")
                         continuation.resume(Resource.Error("Failed to connect to service"))
                     }
                 }
             )
         }
+
+    }
 
     fun unsubscribeToService(parentId: String = MEDIA_ROOT_ID) = musicConnection.unsubscribe(parentId)
 
@@ -73,3 +88,4 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
         }
     }
 }
+

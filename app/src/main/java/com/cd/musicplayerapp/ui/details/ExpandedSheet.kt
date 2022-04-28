@@ -14,14 +14,12 @@ import coil.annotation.ExperimentalCoilApi
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
-import com.cd.musicplayerapp.ui.components.ExpandedPager
-import com.cd.musicplayerapp.ui.main.RepeatState
+import com.cd.musicplayerapp.ui.components.ExpandedSheetContent
+import com.cd.musicplayerapp.ui.main.repeatModeList
 import com.cd.musicplayerapp.ui.theme.Blue
 import com.cd.musicplayerapp.ui.theme.Light
 import com.cd.musicplayerapp.ui.theme.LightBlue
 import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.rememberPagerState
-import timber.log.Timber
 
 @OptIn(ExperimentalCoilApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -33,7 +31,7 @@ fun ExpandedSheet(
     onValueChangedFinished: (Long) -> Unit,
     currentPlayerPosition: Long,
     addToPlaylist: (Music) -> Unit,
-    repeatState: RepeatState,
+    repeatMode: Int,
     onRepeatStateChanged: () -> Unit,
     valueChanging: () -> Unit,
     collapse: () -> Unit
@@ -45,7 +43,7 @@ fun ExpandedSheet(
             .clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp))
             .background(MaterialTheme.colors.background)
     ) {
-        ExpandedPager(
+        ExpandedSheetContent(
             modifier = Modifier.weight(1f),
             collapse = collapse,
             music = currentPlayingMusic
@@ -60,7 +58,7 @@ fun ExpandedSheet(
             onValueChangedFinished = onValueChangedFinished,
             valueChanging = valueChanging,
             addToPlaylist = addToPlaylist,
-            repeatState = repeatState,
+            repeatState = repeatMode,
             onRepeatStateChanged = onRepeatStateChanged
         )
         Spacer(Modifier.height(15.dp))
@@ -78,7 +76,7 @@ fun Seeker(
     currentPlayerPosition: Long,
     onValueChangedFinished: (Long) -> Unit,
     valueChanging: () -> Unit,
-    repeatState: RepeatState,
+    repeatState: Int,
     onRepeatStateChanged: () -> Unit
 ) {
 
@@ -131,10 +129,13 @@ fun Seeker(
                 modifier = Modifier.size(25.dp),
                 painter = painterResource(
                     id = when(repeatState) {
-                        RepeatState.RepeatPlaylist -> R.drawable.ic_repeat
-                        RepeatState.RepeatCurrentSong -> R.drawable.ic_repeat_one
-                        RepeatState.PlayPlaylistOnce -> R.drawable.ic_play_next_song
-                        RepeatState.ShufflePlaylist -> R.drawable.ic_shuffle_icon
+                        repeatModeList[0] -> R.drawable.ic_repeat
+                        repeatModeList[1] -> R.drawable.ic_repeat_one
+                        repeatModeList[2] -> R.drawable.ic_play_next_song
+                        repeatModeList[3] -> R.drawable.ic_shuffle_icon
+                        else -> {
+                            R.drawable.ic_repeat
+                        }
                     }
                 ),
                 contentDescription = null,

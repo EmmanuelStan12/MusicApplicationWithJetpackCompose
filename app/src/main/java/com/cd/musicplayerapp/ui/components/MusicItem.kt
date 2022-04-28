@@ -13,18 +13,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.core.net.toUri
 import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
-import com.cd.musicplayerapp.data.MusicDatasource
 import com.cd.musicplayerapp.domain.Music
-import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
@@ -38,11 +35,11 @@ fun MusicItem(
     isPlaying: Boolean,
     bottomPadding: Dp = 10.dp,
     onClick: (Music) -> Unit,
-    onPlayClick: (Music, Boolean) -> Unit
+    onPlayClick: (Music, Boolean) -> Unit,
+    onAlbumClicked: ((String) -> Unit)?
 ) {
 
     val colors = MaterialTheme.colors
-    val context = LocalContext.current
     val painter = rememberImagePainter(music.bitmap)
 
     Row(
@@ -73,10 +70,13 @@ fun MusicItem(
                     )
                 }
                 is ImagePainter.State.Success -> {
-                    Image(painter = painter, contentDescription = null)
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
                 }
                 is ImagePainter.State.Error -> {
-                    Timber.d("error ${(painter.state as ImagePainter.State.Error).result.throwable}")
                     Icon(
                         painter = painterResource(R.drawable.ic_noise),
                         contentDescription = null,
@@ -84,9 +84,12 @@ fun MusicItem(
                         modifier = Modifier.size(30.dp)
                     )
                 }
-                ImagePainter.State.Empty -> {
-                    Timber.d("Empty")
-                    Image(painter = painter, contentDescription = null)
+                is ImagePainter.State.Empty -> {
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop
+                    )
                 }
             }
         }
@@ -125,14 +128,16 @@ fun MusicItem(
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Light.copy(alpha = 0.1f))
-                    .clickable { }
-                    .padding(horizontal = 10.dp, vertical = 7.dp)
-            ) {
-                Text(text = music.album, style = MaterialTheme.typography.button, color = Light)
+            onAlbumClicked?.let {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Light.copy(alpha = 0.1f))
+                        .clickable { it(music.album) }
+                        .padding(horizontal = 10.dp, vertical = 7.dp)
+                ) {
+                    Text(text = music.album, style = MaterialTheme.typography.button, color = Light)
+                }
             }
         }
     }

@@ -9,6 +9,8 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.core.os.bundleOf
 import com.cd.musicplayerapp.domain.Resource
+import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.Player.REPEAT_MODE_ALL
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -53,9 +55,23 @@ class MusicServiceConnection @Inject constructor(
     private val _playbackState = MutableStateFlow<PlaybackStateCompat?>(null)
     val playbackState = _playbackState.asStateFlow()
 
+    val shuffleMode: Int
+        get() = mediaControllerCompat.shuffleMode
+
+    val repeatMode: Int get() =
+        mediaControllerCompat.repeatMode
+
+    fun changeRepeatState(repeatMode: Int) {
+        transportControls.setRepeatMode(repeatMode)
+    }
+
+    fun changeShuffleState(state: Int) {
+        transportControls.setShuffleMode(state)
+        transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
+    }
+
     fun subscribe(parentId: String, callbacks: MediaBrowserCompat.SubscriptionCallback) {
-        Timber.d("parentId $parentId")
-        mediaBrowser.subscribe(parentId, bundleOf("parentId" to parentId), callbacks)
+        mediaBrowser.subscribe(parentId, callbacks)
     }
 
     fun unsubscribe(parentId: String) {

@@ -19,18 +19,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import coil.annotation.ExperimentalCoilApi
 import coil.compose.ImagePainter
 import coil.compose.rememberImagePainter
 import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
-import com.cd.musicplayerapp.exoplayer.loadMusicImageUri
 import com.cd.musicplayerapp.ui.theme.Black
 import com.cd.musicplayerapp.ui.theme.Light
 import com.google.accompanist.pager.ExperimentalPagerApi
+import timber.log.Timber
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun ExpandedPager(
+fun ExpandedSheetContent(
     music: Music,
     modifier: Modifier = Modifier,
     collapse: () -> Unit
@@ -63,16 +64,16 @@ fun ExpandedPager(
                 )
             }
         }
-        HorizontalPagerItem(music = music)
+        ExpandedSheetItem(music = music)
     }
 
 }
 
+@OptIn(ExperimentalCoilApi::class)
 @Composable
-fun HorizontalPagerItem(
+fun ExpandedSheetItem(
     music: Music
 ) {
-    val context = LocalContext.current
     val painter = rememberImagePainter(music.bitmap)
 
     Column(
@@ -85,25 +86,7 @@ fun HorizontalPagerItem(
         Text(text = music.album, style = MaterialTheme.typography.h4)
         Spacer(Modifier.height(10.dp))
         when (painter.state) {
-            is ImagePainter.State.Success -> {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .fillMaxHeight(0.5f)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Black),
-                ) {
-                    Image(
-                        painter = painter,
-                        contentDescription = null,
-                        contentScale = ContentScale.Fit,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .align(Alignment.Center)
-                    )
-                }
-            }
-            else -> {
+            is ImagePainter.State.Loading -> {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
@@ -117,6 +100,60 @@ fun HorizontalPagerItem(
                         tint = Light,
                         modifier = Modifier
                             .fillMaxSize(0.8f)
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            is ImagePainter.State.Success -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(0.5f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Black),
+                ) {
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            is ImagePainter.State.Error -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(0.5f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Black),
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_headphones),
+                        contentDescription = null,
+                        tint = Light,
+                        modifier = Modifier
+                            .fillMaxSize(0.8f)
+                            .align(Alignment.Center)
+                    )
+                }
+            }
+            is ImagePainter.State.Empty -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.8f)
+                        .fillMaxHeight(0.5f)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Black),
+                ) {
+                    Image(
+                        painter = painter,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
                             .align(Alignment.Center)
                     )
                 }
