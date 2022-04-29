@@ -21,6 +21,9 @@ import com.cd.musicplayerapp.ui.Screen
 import com.cd.musicplayerapp.ui.components.MusicItem
 import com.cd.musicplayerapp.ui.components.Searchbar
 import com.cd.musicplayerapp.ui.main.MusicState
+import com.cd.musicplayerapp.ui.theme.Black
+import com.cd.musicplayerapp.ui.theme.Blue
+import com.cd.musicplayerapp.ui.theme.Dark
 import com.cd.musicplayerapp.ui.theme.Light
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -62,7 +65,7 @@ fun HomeScreen(
                     onClick = {
                         navController.navigate(Screen.PlaylistDetailScreen.route)
                     },
-                    backgroundColor = Light
+                    backgroundColor = Blue,
                 ) {
                     Image(
                         painter = painterResource(id = R.drawable.ic_playlist),
