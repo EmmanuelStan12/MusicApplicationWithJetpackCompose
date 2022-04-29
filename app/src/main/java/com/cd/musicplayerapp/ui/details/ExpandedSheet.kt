@@ -15,6 +15,7 @@ import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.exoplayer.timeInMinutes
 import com.cd.musicplayerapp.ui.components.ExpandedSheetContent
+import com.cd.musicplayerapp.ui.main.RepeatMode
 import com.cd.musicplayerapp.ui.main.repeatModeList
 import com.cd.musicplayerapp.ui.theme.Blue
 import com.cd.musicplayerapp.ui.theme.Light
@@ -31,7 +32,7 @@ fun ExpandedSheet(
     onValueChangedFinished: (Long) -> Unit,
     currentPlayerPosition: Long,
     addToPlaylist: (Music) -> Unit,
-    repeatMode: Int,
+    repeatMode: RepeatMode,
     onRepeatStateChanged: () -> Unit,
     valueChanging: () -> Unit,
     collapse: () -> Unit
@@ -76,7 +77,7 @@ fun Seeker(
     currentPlayerPosition: Long,
     onValueChangedFinished: (Long) -> Unit,
     valueChanging: () -> Unit,
-    repeatState: Int,
+    repeatState: RepeatMode,
     onRepeatStateChanged: () -> Unit
 ) {
 
@@ -129,13 +130,10 @@ fun Seeker(
                 modifier = Modifier.size(25.dp),
                 painter = painterResource(
                     id = when(repeatState) {
-                        repeatModeList[0] -> R.drawable.ic_repeat
-                        repeatModeList[1] -> R.drawable.ic_repeat_one
-                        repeatModeList[2] -> R.drawable.ic_play_next_song
-                        repeatModeList[3] -> R.drawable.ic_shuffle_icon
-                        else -> {
-                            R.drawable.ic_repeat
-                        }
+                        RepeatMode.RepeatModeAll -> R.drawable.ic_repeat
+                        RepeatMode.RepeatModeOne -> R.drawable.ic_repeat_one
+                        RepeatMode.RepeatModeNone -> R.drawable.ic_play_next_song
+                        RepeatMode.ShuffleModeAll -> R.drawable.ic_shuffle_icon
                     }
                 ),
                 contentDescription = null,

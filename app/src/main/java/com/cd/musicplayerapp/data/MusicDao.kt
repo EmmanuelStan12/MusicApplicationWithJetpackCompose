@@ -31,4 +31,19 @@ interface MusicDao {
         deleteAllSongs()
         insertSongs(songs)
     }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlaylists(playlists: List<PlaylistEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertPlaylist(playlist: PlaylistEntity)
+
+    @Query("SELECT * FROM playlistentity")
+    fun getAllPlaylists(): List<PlaylistEntity>
+
+    @Query("SELECT * FROM playlistentity WHERE title LIKE '%' || :query || '%' ")
+    fun searchPlaylist(query: String): Flow<List<PlaylistEntity>>
+
+    @Query("SELECT * FROM playlistentity WHERE title = :title")
+    suspend fun getPlaylistByTitle(title: String): PlaylistEntity
 }

@@ -1,10 +1,7 @@
 package com.cd.musicplayerapp.data
 
 import android.content.Context
-import com.cd.musicplayerapp.domain.Music
-import com.cd.musicplayerapp.domain.MusicRepository
-import com.cd.musicplayerapp.domain.Resource
-import com.cd.musicplayerapp.domain.toMusicEntity
+import com.cd.musicplayerapp.domain.*
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -35,4 +32,26 @@ class MusicRepositoryImpl @Inject constructor(
     override suspend fun deleteSong(song: Music) = dao.deleteSong(song.toMusicEntity())
 
     override suspend fun deleteAllSongs() = dao.deleteAllSongs()
+
+    override fun searchPlaylist(query: String): Flow<List<Playlist>> =
+        dao.searchPlaylist(query).map {
+            it.map { entity -> entity.toPlaylist() }
+        }
+
+    override suspend fun getAllPlaylists(): List<Playlist> = dao.getAllPlaylists().map {
+        it.toPlaylist()
+    }
+
+    override suspend fun getPlaylistByTitle(title: String): Playlist =
+        dao.getPlaylistByTitle(title).toPlaylist()
+
+    override suspend fun insertPlaylists(playlists: List<Playlist>) {
+
+    }
+
+    override suspend fun insertPlaylist(playlist: Playlist): Flow<Resource<Unit>> = flow {
+        emit(Resource.Loading())
+        dao.insertPlaylist(playlist.toPlaylistEntity())
+        emit(Resource.Success(data = Unit))
+    }
 }

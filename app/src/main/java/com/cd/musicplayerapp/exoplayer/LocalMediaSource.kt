@@ -11,6 +11,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.RequestManager
 import com.cd.musicplayerapp.data.MusicDao
 import com.cd.musicplayerapp.data.MusicDatasource
+import com.cd.musicplayerapp.data.PlaylistEntity
+import com.cd.musicplayerapp.domain.Playlist
 import com.cd.musicplayerapp.domain.toMusicEntity
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
@@ -52,7 +54,14 @@ class LocalMediaSource @Inject constructor(
     private suspend fun updateCatalog(): List<MediaMetadataCompat> {
         return withContext(Dispatchers.IO) {
             val songs = source.loadLocalMusic()
-            dao.cacheSongs(songs.map { it.toMusicEntity() })
+            val playlists = mutableSetOf<PlaylistEntity>()
+            dao.cacheSongs(
+                songs.map {
+                    playlists.add(PlaylistEntity(it.album))
+                    it.toMusicEntity()
+                }
+            )
+            dao.insertPlaylists(playlists.toList())
             songs.map { music ->
                 val ( _mediaId, title, duration, artists, bitmap, musicUri, album, size ) = music
 

@@ -18,4 +18,14 @@ interface MusicRepository {
 
     suspend fun deleteAllSongs()
 
+    fun searchPlaylist(query: String = ""): Flow<List<Playlist>>
+
+    suspend fun getAllPlaylists(): List<Playlist>
+
+    suspend fun getPlaylistByTitle(title: String): Playlist
+
+    suspend fun insertPlaylists(playlists: List<Playlist>)
+
+    suspend fun insertPlaylist(playlist: Playlist): Flow<Resource<Unit>>
+
 }

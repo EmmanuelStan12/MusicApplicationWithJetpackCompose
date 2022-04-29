@@ -42,11 +42,6 @@ class MainViewModel @Inject constructor(
         subscribeToMusic()
         collectCurrentSong()
         collectPlayBackState()
-        viewModelScope.launch {
-            useCase.connectionState.collect {
-                Timber.d("connection state $it")
-            }
-        }
     }
 
     fun updateCurrentPlayerPosition() = viewModelScope.launch {
@@ -64,18 +59,19 @@ class MainViewModel @Inject constructor(
     }
 
     fun onRepeatStateChanged() {
-        val currentRepeatMode = state.value.repeatMode
-        val currentRepeatModeIndex = repeatModeList.indexOf(currentRepeatMode)
-        val nextRepeatModeIndex = if((currentRepeatModeIndex + 1) >= repeatModeList.size)
-            0 else currentRepeatModeIndex + 1
-        if(nextRepeatModeIndex == repeatModeList.lastIndex) {
+        val previousRepeatMode = state.value.repeatMode
+        val previousRepeatModeIndex = repeatModeList.indexOf(previousRepeatMode)
+        val currentRepeatModeIndex = if(previousRepeatModeIndex == repeatModeList.lastIndex)
+            0 else previousRepeatModeIndex + 1
+        if(currentRepeatModeIndex == repeatModeList.lastIndex) {
             useCase.changeRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
             useCase.changeShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_ALL)
         } else {
-            useCase.changeRepeatMode(repeatModeList[nextRepeatModeIndex])
+            useCase.changeRepeatMode(repeatModeList[currentRepeatModeIndex].playbackState)
             useCase.changeShuffleMode(PlaybackStateCompat.SHUFFLE_MODE_NONE)
         }
-        _state.value = state.value.copy(repeatMode = repeatModeList[nextRepeatModeIndex])
+        _state.value = state.value.copy(repeatMode = repeatModeList[currentRepeatModeIndex])
+
     }
 
     fun playFromMediaId(music: Music) {
@@ -92,6 +88,7 @@ class MainViewModel @Inject constructor(
     private fun collectCurrentSong() = viewModelScope.launch {
         currentSong.collectLatest { metadata ->
             val music = metadata?.description?.mediaId?.let { repository.getSongById(it) }
+            Timber.d("music id $music")
 
             _state.value = state.value.copy(currentPlayingMusic = music)
         }
@@ -110,15 +107,27 @@ class MainViewModel @Inject constructor(
         useCase.playPause(music._mediaId, true)
     }
 
+    fun subscribeToMusicFromAlbumTitle(title: String) {
+        viewModelScope.launch {
+            useCase.unsubscribeToService()
+            val resource = useCase.subscribeToService(title)
+            if(resource is Resource.Success) {
+                collectCurrentSong()
+            }
+        }
+    }
+
     private fun subscribeToMusic() {
         viewModelScope.launch(Dispatchers.IO) {
             withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(loading = true)
             }
             val resource = useCase.subscribeToService()
-            Timber.d("resource mainview model ${resource.error} ${resource.data} ${resource.loading}")
             when (resource) {
-                is Resource.Success -> collectSongs()
+                is Resource.Success -> {
+                    collectSongs()
+                    collectPlaylists()
+                }
                 is Resource.Error -> Timber.d("error ${resource.error}")
                 is Resource.Loading -> {
                     Timber.d("some thing else is happening")
@@ -141,6 +150,12 @@ class MainViewModel @Inject constructor(
         repository.getAllSongs().also {
             Timber.d("list ${it.joinToString(" ")}")
             _state.value = state.value.copy(musicList = it, loading = false)
+        }
+    }
+
+    private suspend fun collectPlaylists() {
+        repository.getAllPlaylists().also {
+            _state.value = state.value.copy(albumMusicList = it)
         }
     }
 

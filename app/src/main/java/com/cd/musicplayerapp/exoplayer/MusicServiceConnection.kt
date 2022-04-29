@@ -47,6 +47,7 @@ class MusicServiceConnection @Inject constructor(
         null
     ).apply {
         connect()
+
     }
 
     private val transportControls: MediaControllerCompat.TransportControls
@@ -67,11 +68,13 @@ class MusicServiceConnection @Inject constructor(
 
     fun changeShuffleState(state: Int) {
         transportControls.setShuffleMode(state)
-        transportControls.setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL)
     }
 
     fun subscribe(parentId: String, callbacks: MediaBrowserCompat.SubscriptionCallback) {
         mediaBrowser.subscribe(parentId, callbacks)
+        if(parentId != MEDIA_ROOT_ID) {
+            transportControls.play()
+        }
     }
 
     fun unsubscribe(parentId: String) {
@@ -139,7 +142,13 @@ class MusicServiceConnection @Inject constructor(
 
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
+            Timber.d("metadata changed to ${metadata?.getMusic(context)}")
+            val music = mediaControllerCompat.metadata
+            Timber.d("metadata from controller changed to ${music?.getMusic(context)}")
+
             coroutineScope.launch { _currentSong.value = metadata }
         }
+
+
     }
 }

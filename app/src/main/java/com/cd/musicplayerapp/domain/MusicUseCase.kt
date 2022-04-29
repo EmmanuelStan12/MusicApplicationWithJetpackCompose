@@ -40,7 +40,6 @@ class MusicUseCase @Inject constructor(private val musicConnection: MusicService
                         children: MutableList<MediaBrowserCompat.MediaItem>
                     ) {
                         super.onChildrenLoaded(parentId, children)
-                        Timber.d("children loaded ${children.joinToString(" ,")}")
                         continuation.resume(Resource.Success(children))
                     }
 

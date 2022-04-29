@@ -6,4 +6,6 @@ sealed class Screen(
     object Home: Screen("home_screen")
 
     object PlaylistScreen: Screen("playlist_screen")
+
+    object PlaylistDetailScreen: Screen("playlist_detail_screen")
 }

@@ -2,6 +2,7 @@ package com.cd.musicplayerapp.exoplayer
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -13,11 +14,13 @@ import androidx.core.content.ContextCompat
 import androidx.media.MediaBrowserServiceCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.Player
+import com.google.android.exoplayer2.audio.AudioAttributes
 import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,6 +46,8 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private var currentPlayingSong: MediaMetadataCompat? = null
 
     @Inject
+    lateinit var audioAttributes: AudioAttributes
+
     lateinit var exoPlayer: ExoPlayer
 
     @Inject
@@ -65,8 +70,16 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
 
     private lateinit var musicNavigator: MusicQueueNavigator
 
+    private fun createPlayer() {
+        exoPlayer = ExoPlayer.Builder(baseContext)
+            .setAudioAttributes(audioAttributes, true)
+            .setHandleAudioBecomingNoisy(true)
+            .build()
+    }
+
     override fun onCreate() {
         super.onCreate()
+        createPlayer()
         initialize()
         scope.launch {
             musicSource.load()
@@ -101,6 +114,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
             musicSource
         ) {
             currentPlayingSong = it
+            Timber.d("playback preparer ${it.getMusic(this)}")
             preparePlayer(musicSource.songs, it, true)
         }
 
@@ -111,7 +125,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                 else musicNotificationManager.hideNotification()
             },
             stopForeground = {
-                stopForeground(false)
+                stopForeground(it)
             }
         )
 
@@ -134,9 +148,6 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         clientUid: Int,
         rootHints: Bundle?
     ): BrowserRoot? {
-        Timber.d("client package $clientPackageName")
-        Timber.d("hints $rootHints")
-        Timber.d("client uid $clientUid")
         return if(allowBrowsing(clientPackageName, clientUid)) {
             // Returns a root ID that clients can use with onLoadChildren() to retrieve
             // the content hierarchy.
@@ -180,17 +191,18 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
         songs: List<MediaMetadataCompat>,
         itemToPlay: MediaMetadataCompat,
         playNow: Boolean,
-        shuffle: Boolean = false
+        restart: Boolean = false
     ) {
-        val currentSongIndex = if(currentPlayingSong == null) 0 else songs.indexOf(itemToPlay)
+        val currentSongIndex = if(currentPlayingSong == null || restart) 0 else songs.indexOf(itemToPlay)
         exoPlayer.apply {
             repeatMode = Player.REPEAT_MODE_ALL
             setMediaSource(songs.asMediaSource(dataSourceFactory))
-            shuffleModeEnabled = shuffle
             prepare()
             seekTo(currentSongIndex, 0L)
             playWhenReady = playNow
         }
+        Timber.d("current playing song artists ${exoPlayer.mediaMetadata.artist}")
+        Timber.d("current playing song artists ${exoPlayer.currentMediaItem?.mediaMetadata?.artist}")
     }
 
     private fun allowBrowsing(clientPackageName: String, clientUid: Int): Boolean {
@@ -219,38 +231,22 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
                     }
                 }
                 if (!resultSent) result.detach()
-            }
-            SHUFFLE -> {
-                val resultSent = musicSource.whenReady { isInitialized ->
-                    if (isInitialized) {
-                        result.sendResult(
-                            musicSource.shuffledSongs.asMediaItems().toMutableList()
-                        )
-                        if (!isPlayerInitialized && musicSource.filteredSongs.isNotEmpty()) {
-                            preparePlayer(
-                                musicSource.filteredSongs,
-                                musicSource.filteredSongs[0],
-                                false
-                            )
-                        }
-                    } else {
-                        result.sendResult(null)
-                    }
-                }
-                if (!resultSent) result.detach()
-            }
-            else -> {
+            } else -> {
                 val resultSent = musicSource.whenReady { isInitialized ->
                     if (isInitialized) {
                         musicSource.filter(parentId)
+                        exoPlayer.clearMediaItems()
                         result.sendResult(
                             musicSource.filteredSongs.asMediaItems().toMutableList()
                         )
                         if (!isPlayerInitialized && musicSource.filteredSongs.isNotEmpty()) {
+                            currentPlayingSong = null
+                            Timber.d("filtered songs ${musicSource.filteredSongs.joinToString(" ")}")
                             preparePlayer(
                                 musicSource.filteredSongs,
                                 musicSource.filteredSongs[0],
-                                false
+                                false,
+                                restart = true
                             )
                         }
                     } else {

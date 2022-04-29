@@ -51,8 +51,8 @@ fun MediaMetadataCompat.getMusic(context: Context): Music = run {
         artists = description.description.toString().split(","),
         bitmap = null,
         musicUri = description.mediaUri.toString(),
-        album = getString(MediaMetadataCompat.METADATA_KEY_ALBUM),
-        size = getString(METADATA_KEY_SIZE)
+        album = "",
+        size = ""
     )
 }
 

@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.cd.musicplayerapp.ui.Screen
 import com.cd.musicplayerapp.ui.details.BottomSheetContent
 import com.cd.musicplayerapp.ui.home.HomeScreen
+import com.cd.musicplayerapp.ui.playlist_detail_screen.PlaylistDetailScreen
 import com.cd.musicplayerapp.ui.playlist_screen.PlaylistScreen
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -97,14 +98,29 @@ fun Navigation(viewModel: MainViewModel = hiltViewModel()) {
                     navController = navController
                 )
             }
-
-            composable("${Screen.PlaylistScreen.route}/{album}",
+            composable(Screen.PlaylistDetailScreen.route) {
+                PlaylistDetailScreen(
+                    album = state.currentSelectedAlbum,
+                    data = state.albumMusicList,
+                    searchValue = "",
+                    onSearchValueChanged = {},
+                    scope = scope,
+                    onPlayPausePressed = {
+                        viewModel.subscribeToMusicFromAlbumTitle(it.title)
+                    },
+                    onClick = {
+                        navController.navigate("${Screen.PlaylistScreen.route}/${it.title}")
+                    }
+                )
+            }
+            composable(
+                "${Screen.PlaylistScreen.route}/{album}",
                 arguments = listOf(navArgument("album") { type = NavType.StringType })
-            ){ backStackEntry ->
+            ) { backStackEntry ->
                 viewModel.changeAlbum(backStackEntry.arguments?.getString("album") ?: "")
                 PlaylistScreen(
                     album = backStackEntry.arguments?.getString("album") ?: "",
-                    data = state.albumFilteredList ,
+                    data = state.albumFilteredList,
                     searchValue = state.searchValue,
                     onSearchValueChanged = viewModel::onSearchQueryChanged,
                     currentPlayingMusic = state.currentPlayingMusic,

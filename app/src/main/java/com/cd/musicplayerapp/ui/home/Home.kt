@@ -1,20 +1,21 @@
 package com.cd.musicplayerapp.ui.home
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.*
 import androidx.compose.material.MaterialTheme.colors
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.cd.musicplayerapp.R
 import com.cd.musicplayerapp.domain.Music
 import com.cd.musicplayerapp.ui.Screen
 import com.cd.musicplayerapp.ui.components.MusicItem
@@ -23,6 +24,7 @@ import com.cd.musicplayerapp.ui.main.MusicState
 import com.cd.musicplayerapp.ui.theme.Light
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @Composable
 fun HomeScreen(
@@ -38,21 +40,52 @@ fun HomeScreen(
     navController: NavController
 ) {
 
+    val lazyListState = rememberLazyListState()
+    LaunchedEffect(key1 = true) {
+        lazyListState.interactionSource.interactions.collect {
+            Timber.d("interaction ${it.toString()}")
+        }
+    }
 
-    Box(
+    Scaffold(
         modifier = Modifier
             .fillMaxSize()
             .background(colors.background)
             .padding(top = 10.dp, start = 15.dp, end = 15.dp),
-        contentAlignment = Alignment.Center
+        floatingActionButton = {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 60.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                FloatingActionButton(
+                    onClick = {
+                        navController.navigate(Screen.PlaylistDetailScreen.route)
+                    },
+                    backgroundColor = Light
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_playlist),
+                        contentDescription = null,
+                        modifier = Modifier.size(34.dp),
+                    )
+                }
+            }
+        }
     ) {
 
         if (loading) {
-            CircularProgressIndicator(color = Light)
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Light)
+            }
         }
         Column(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
-                contentPadding = PaddingValues(bottom = 10.dp)
+                contentPadding = PaddingValues(bottom = 10.dp),
+                state = lazyListState
             ) {
                 musicItems(
                     data,

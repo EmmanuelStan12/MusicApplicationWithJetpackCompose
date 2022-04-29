@@ -26,16 +26,6 @@ object ServiceModule {
 
     @Provides
     @ServiceScoped
-    fun provideExoPlayer(
-        @ApplicationContext context: Context,
-        audioAttributes: AudioAttributes
-    ) = ExoPlayer.Builder(context)
-        .setAudioAttributes(audioAttributes, true)
-        .setHandleAudioBecomingNoisy(true)
-        .build()
-
-    @Provides
-    @ServiceScoped
     fun providesDataSourceFactory(
         @ApplicationContext context: Context
     ) = DefaultDataSource.Factory(context)
