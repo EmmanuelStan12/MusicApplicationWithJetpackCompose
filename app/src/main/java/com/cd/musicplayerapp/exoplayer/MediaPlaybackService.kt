@@ -2,6 +2,7 @@ package com.cd.musicplayerapp.exoplayer
 
 import android.app.Notification
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -91,7 +92,7 @@ class MediaPlaybackService : MediaBrowserServiceCompat() {
     private fun initialize() {
         val sessionActivityPendingIntent =
             packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
-                PendingIntent.getActivity(this, 0, sessionIntent, 0)
+                PendingIntent.getActivity(this, 0, sessionIntent, FLAG_IMMUTABLE)
             }
 
         mediaSession = MediaSessionCompat(baseContext, TAG)

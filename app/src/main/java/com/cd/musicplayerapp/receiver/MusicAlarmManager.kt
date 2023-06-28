@@ -2,6 +2,7 @@ package com.cd.musicplayerapp.receiver
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
@@ -21,7 +22,7 @@ class MusicAlarmManager @Inject constructor(
     fun initialize() {
         alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         alarmManagerPendingIntent = Intent(context, AlarmReceiver::class.java).let { intent ->
-            PendingIntent.getBroadcast(context, REQUEST_CODE, intent, 0)
+            PendingIntent.getBroadcast(context, REQUEST_CODE, intent, FLAG_IMMUTABLE)
         }
 
         alarmManager?.setInexactRepeating(
